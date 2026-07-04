@@ -5,7 +5,6 @@ function App() {
   const [isUnlocked, setIsUnlocked] = useState(false)
 
   const handleCekSandi = () => {
-    // Simulasi enkripsi sederhana: PIN yang benar adalah "1234"
     if (pin === '1234') {
       setIsUnlocked(true)
     } else {
@@ -14,12 +13,21 @@ function App() {
     }
   }
 
+  // Fungsi untuk menangani saat brankas di-klik/ditembak oleh VR Controller
+  const handleBrankasClick = () => {
+    if (!isUnlocked) {
+      alert('Brankas masih terkunci! Masukkan PIN di panel UI terlebih dahulu.');
+    } else {
+      alert('Isi data rahasia berhasil diakses!');
+    }
+  }
+
   return (
     <div className="relative w-full h-screen overflow-hidden">
       
       {/* --- LAPISAN UI 2D (React + Tailwind) --- */}
-      {/* UI ini mengambang di atas kanvas 3D, jadi tidak akan terpengaruh oleh kamera VR */}
       <div className="absolute top-10 left-1/2 -translate-x-1/2 z-10 w-11/12 max-w-md bg-white/90 backdrop-blur-sm p-6 rounded-2xl shadow-2xl text-center border border-gray-200">
+        {/* ... (Isi UI sama seperti sebelumnya) ... */}
         <h1 className="text-2xl font-bold text-slate-800 mb-2">Vaultify Edu-VR</h1>
         <p className="text-sm text-slate-600 mb-5">
           Simulasi Keamanan Data: Masukkan PIN rahasia untuk mendekripsi dan membuka brankas.
@@ -50,53 +58,59 @@ function App() {
       </div>
 
       {/* --- LAPISAN 3D WEBXR (A-Frame) --- */}
-      {/* embedded prop digunakan agar a-scene tidak memaksa fullscreen menutupi UI React */}
       <a-scene embedded style={{ width: '100%', height: '100%' }}>
-        
-        {/* Latar Belakang (Berubah warna jika brankas terbuka) */}
         <a-sky color={isUnlocked ? "#87CEEB" : "#0f172a"}></a-sky>
-
-        {/* Pencahayaan */}
         <a-light type="ambient" color={isUnlocked ? "#fff" : "#555"}></a-light>
         <a-light type="directional" position="2 4 -3" intensity="0.6"></a-light>
 
-        {/* Objek Utama: Brankas (Warna dan animasi bereaksi terhadap state React) */}
+        {/* Tambahkan class "clickable" agar raycaster (laser) tahu objek ini bisa diinteraksi.
+          onClick bawaan React bisa menangkap event click dari A-Frame berkat Cursor/Laser.
+        */}
         <a-box
+          className="clickable"
+          onClick={handleBrankasClick}
           position="0 1 -4"
           color={isUnlocked ? "#4ade80" : "#ef4444"}
-          depth="1.5"
-          height="1.5"
-          width="1.5"
-          wireframe={!isUnlocked} // Efek visual data terenkripsi (belum utuh)
+          depth="1.5" height="1.5" width="1.5"
+          wireframe={!isUnlocked}
           animation={
             isUnlocked
               ? "property: rotation; to: 0 360 0; loop: true; dur: 8000; easing: linear"
-              : "property: rotation; to: 0 10 0; dir: alternate; loop: true; dur: 2000" // Efek melayang/menunggu
+              : "property: rotation; to: 0 10 0; dir: alternate; loop: true; dur: 2000"
           }
         ></a-box>
 
-        {/* Teks Status 3D melayang di atas brankas */}
         <a-text
           value={isUnlocked ? "DATA AMAN\n(DECRYPTED)" : "TERKUNCI\n(ENCRYPTED)"}
-          position="0 2.5 -4"
-          align="center"
-          color={isUnlocked ? "#15803d" : "#ef4444"}
-          scale="1.5 1.5 1.5"
+          position="0 2.5 -4" align="center"
+          color={isUnlocked ? "#15803d" : "#ef4444"} scale="1.5 1.5 1.5"
         ></a-text>
 
-        {/* Lantai Virtual */}
-        <a-plane
-          position="0 0 -4"
-          rotation="-90 0 0"
-          width="20"
-          height="20"
-          color={isUnlocked ? "#e2e8f0" : "#1e293b"}
-        ></a-plane>
+        <a-plane position="0 0 -4" rotation="-90 0 0" width="20" height="20" color={isUnlocked ? "#e2e8f0" : "#1e293b"}></a-plane>
 
-        {/* Kamera Utama */}
-        <a-camera position="0 1.6 0"></a-camera>
+        {/* --- PLAYER RIG & CONTROLLERS --- */}
+        <a-entity id="rig" position="0 0 0">
+          <a-camera position="0 1.6 0">
+            {/* 1. Cursor untuk PC/Mobile (titik putih di tengah layar) */}
+            <a-cursor 
+              raycaster="objects: .clickable" 
+              color="#FF0000"
+              animation__click="property: scale; startEvents: click; easing: easeInCubic; dur: 150; from: 0.1 0.1 0.1; to: 1 1 1"
+            ></a-cursor>
+          </a-camera>
+
+          {/* 2. Laser Controllers untuk VR Headset (Kiri & Kanan) */}
+          <a-entity 
+            laser-controls="hand: left" 
+            raycaster="objects: .clickable; far: 20"
+          ></a-entity>
+          <a-entity 
+            laser-controls="hand: right" 
+            raycaster="objects: .clickable; far: 20"
+          ></a-entity>
+        </a-entity>
+
       </a-scene>
-
     </div>
   )
 }
