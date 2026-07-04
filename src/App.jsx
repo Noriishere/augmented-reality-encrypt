@@ -4,110 +4,148 @@ function App() {
   const [pin, setPin] = useState('')
   const [isUnlocked, setIsUnlocked] = useState(false)
 
-  const handleCekSandi = () => {
-    if (pin === '1234') {
-      setIsUnlocked(true)
+  // Fungsi untuk menangani input dari Virtual Keyboard 3D
+  const handleKeyPress = (key) => {
+    if (isUnlocked) return; // Jika sudah terbuka, keyboard non-aktif
+
+    if (key === 'CLR') {
+      setPin('');
+    } else if (key === 'ENT') {
+      if (pin === '1234') {
+        setIsUnlocked(true);
+      } else {
+        alert('AKSES DITOLAK: Sandi Salah!');
+        setPin('');
+      }
     } else {
-      alert('Sandi salah! Data tetap terenkripsi.')
-      setPin('')
+      if (pin.length < 4) {
+        setPin((prev) => prev + key);
+      }
     }
   }
 
-  // Fungsi untuk menangani saat brankas di-klik/ditembak oleh VR Controller
-  const handleBrankasClick = () => {
-    if (!isUnlocked) {
-      alert('Brankas masih terkunci! Masukkan PIN di panel UI terlebih dahulu.');
-    } else {
-      alert('Isi data rahasia berhasil diakses!');
-    }
-  }
+  // Layout grid untuk Virtual Keyboard
+  const keys = [
+    ['1', '2', '3'],
+    ['4', '5', '6'],
+    ['7', '8', '9'],
+    ['CLR', '0', 'ENT']
+  ];
 
   return (
-    <div className="relative w-full h-screen overflow-hidden">
+    <div className="relative w-full h-screen overflow-hidden bg-black">
       
-      {/* --- LAPISAN UI 2D (React + Tailwind) --- */}
-      <div className="absolute top-10 left-1/2 -translate-x-1/2 z-10 w-11/12 max-w-md bg-white/90 backdrop-blur-sm p-6 rounded-2xl shadow-2xl text-center border border-gray-200">
-        {/* ... (Isi UI sama seperti sebelumnya) ... */}
-        <h1 className="text-2xl font-bold text-slate-800 mb-2">Vaultify Edu-VR</h1>
-        <p className="text-sm text-slate-600 mb-5">
-          Simulasi Keamanan Data: Masukkan PIN rahasia untuk mendekripsi dan membuka brankas.
+      {/* --- HUD / UI 2D (Hanya untuk judul & instruksi, tanpa input form) --- */}
+      <div className="absolute top-5 left-1/2 -translate-x-1/2 z-10 w-11/12 max-w-lg text-center pointer-events-none">
+        <h1 className="text-3xl font-black text-cyan-400 tracking-[0.3em] drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]">
+          CYBER-CRYPT
+        </h1>
+        <p className="text-xs text-cyan-200/70 mt-2 font-mono uppercase tracking-widest bg-black/50 inline-block px-3 py-1 rounded">
+          [ Misi: Dekripsi Data Pusat ]
         </p>
-
-        {!isUnlocked ? (
-          <div className="flex flex-col gap-3">
-            <input
-              type="password"
-              placeholder="Masukkan 4 digit PIN"
-              className="px-4 py-3 border-2 border-slate-300 rounded-lg focus:outline-none focus:border-blue-500 text-center text-xl tracking-widest font-mono"
-              value={pin}
-              onChange={(e) => setPin(e.target.value)}
-              maxLength={4}
-            />
-            <button
-              onClick={handleCekSandi}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition-all shadow-md active:scale-95"
-            >
-              Dekripsi Data
-            </button>
-          </div>
-        ) : (
-          <div className="p-4 bg-green-100 text-green-700 rounded-lg font-bold border border-green-300 text-lg">
-            Akses Diberikan. Data Terbaca!
-          </div>
-        )}
       </div>
 
       {/* --- LAPISAN 3D WEBXR (A-Frame) --- */}
       <a-scene embedded style={{ width: '100%', height: '100%' }}>
-        <a-sky color={isUnlocked ? "#87CEEB" : "#0f172a"}></a-sky>
-        <a-light type="ambient" color={isUnlocked ? "#fff" : "#555"}></a-light>
-        <a-light type="directional" position="2 4 -3" intensity="0.6"></a-light>
+        
+        {/* Latar Belakang Gelap ala Sci-Fi */}
+        <a-sky color="#050b14"></a-sky>
+        
+        {/* Pencahayaan Cyberpunk (Cyan & Hijau) */}
+        <a-light type="ambient" color={isUnlocked ? "#a7f3d0" : "#0f172a"}></a-light>
+        <a-light type="point" position="0 2 -2" intensity="1.5" color={isUnlocked ? "#10b981" : "#22d3ee"}></a-light>
 
-        {/* Tambahkan class "clickable" agar raycaster (laser) tahu objek ini bisa diinteraksi.
-          onClick bawaan React bisa menangkap event click dari A-Frame berkat Cursor/Laser.
-        */}
-        <a-box
-          className="clickable"
-          onClick={handleBrankasClick}
-          position="0 1 -4"
-          color={isUnlocked ? "#4ade80" : "#ef4444"}
-          depth="1.5" height="1.5" width="1.5"
-          wireframe={!isUnlocked}
+        {/* --- CORE DATA (Pengganti Brankas) --- */}
+        {/* Menggunakan Octahedron agar terlihat lebih futuristik */}
+        <a-entity 
+          position="0 1.8 -4" 
           animation={
-            isUnlocked
-              ? "property: rotation; to: 0 360 0; loop: true; dur: 8000; easing: linear"
-              : "property: rotation; to: 0 10 0; dir: alternate; loop: true; dur: 2000"
+            isUnlocked 
+              ? "property: rotation; to: 0 360 0; loop: true; dur: 4000; easing: linear" 
+              : "property: position; to: 0 2 -4; dir: alternate; loop: true; dur: 2000"
           }
-        ></a-box>
+        >
+          <a-octahedron 
+            color={isUnlocked ? "#10b981" : "#0ea5e9"} 
+            radius="0.8" 
+            wireframe={!isUnlocked} // Bentuk kerangka saat terenkripsi, padat saat terbuka
+          ></a-octahedron>
+          
+          {/* Teks Status melayang di atas Core */}
+          <a-text
+            value={isUnlocked ? "ACCESS\nGRANTED" : "ENCRYPTED\nDATA"}
+            position="0 1.2 0"
+            align="center"
+            color={isUnlocked ? "#a7f3d0" : "#bae6fd"}
+            scale="1.2 1.2 1.2"
+          ></a-text>
+        </a-entity>
 
-        <a-text
-          value={isUnlocked ? "DATA AMAN\n(DECRYPTED)" : "TERKUNCI\n(ENCRYPTED)"}
-          position="0 2.5 -4" align="center"
-          color={isUnlocked ? "#15803d" : "#ef4444"} scale="1.5 1.5 1.5"
-        ></a-text>
 
-        <a-plane position="0 0 -4" rotation="-90 0 0" width="20" height="20" color={isUnlocked ? "#e2e8f0" : "#1e293b"}></a-plane>
+        {/* --- VIRTUAL KEYBOARD PANEL --- */}
+        {/* Diletakkan lebih dekat ke pemain dan sedikit dimiringkan ke atas */}
+        <a-entity position="0 1 -2" rotation="-20 0 0">
+          
+          {/* Layar Output PIN Hologram */}
+          <a-plane position="0 0.7 0" width="1.2" height="0.3" color="#020617" border="color: #22d3ee; width: 2" opacity="0.8">
+            <a-text 
+              value={pin.padEnd(4, '_').split('').join(' ')} 
+              align="center" 
+              color={isUnlocked ? "#10b981" : "#22d3ee"} 
+              scale="2.5 2.5 2.5"
+              position="0 0 0.01"
+            ></a-text>
+          </a-plane>
 
-        {/* --- PLAYER RIG & CONTROLLERS --- */}
+          {/* Render Grid Tombol */}
+          <a-entity position="-0.4 0.3 0">
+            {keys.map((row, rowIndex) => (
+              row.map((key, colIndex) => {
+                const isAction = key === 'CLR' || key === 'ENT';
+                return (
+                  <a-entity 
+                    key={key} 
+                    position={`${colIndex * 0.4} ${-rowIndex * 0.3} 0`}
+                  >
+                    {/* Kotak Tombol */}
+                    <a-box 
+                      className="clickable"
+                      onClick={() => handleKeyPress(key)}
+                      width="0.3" height="0.2" depth="0.05"
+                      color={isAction ? "#1e293b" : "#0f172a"}
+                      // Efek Hover (Glow saat disorot laser/kursor)
+                      animation__mouseenter="property: color; to: #38bdf8; startEvents: mouseenter; dur: 150"
+                      animation__mouseleave={`property: color; to: ${isAction ? "#1e293b" : "#0f172a"}; startEvents: mouseleave; dur: 150`}
+                    >
+                      {/* Teks Tombol */}
+                      <a-text 
+                        value={key} 
+                        align="center" 
+                        position="0 0 0.026" 
+                        scale="0.8 0.8 0.8"
+                        color="#e2e8f0"
+                      ></a-text>
+                    </a-box>
+                  </a-entity>
+                )
+              })
+            ))}
+          </a-entity>
+        </a-entity>
+
+        {/* --- PLAYER RIG (Untuk Interaksi VR & Layar Sentuh/Mouse) --- */}
         <a-entity id="rig" position="0 0 0">
           <a-camera position="0 1.6 0">
-            {/* 1. Cursor untuk PC/Mobile (titik putih di tengah layar) */}
+            {/* Kursor dengan warna Cyberpunk */}
             <a-cursor 
               raycaster="objects: .clickable" 
-              color="#FF0000"
+              color="#22d3ee"
               animation__click="property: scale; startEvents: click; easing: easeInCubic; dur: 150; from: 0.1 0.1 0.1; to: 1 1 1"
             ></a-cursor>
           </a-camera>
-
-          {/* 2. Laser Controllers untuk VR Headset (Kiri & Kanan) */}
-          <a-entity 
-            laser-controls="hand: left" 
-            raycaster="objects: .clickable; far: 20"
-          ></a-entity>
-          <a-entity 
-            laser-controls="hand: right" 
-            raycaster="objects: .clickable; far: 20"
-          ></a-entity>
+          
+          <a-entity laser-controls="hand: left" raycaster="objects: .clickable; far: 20"></a-entity>
+          <a-entity laser-controls="hand: right" raycaster="objects: .clickable; far: 20"></a-entity>
         </a-entity>
 
       </a-scene>
