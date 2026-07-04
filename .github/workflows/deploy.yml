@@ -32,9 +32,9 @@ jobs:
     - name: Deploy to VPS via SFTP
       uses: appleboy/scp-action@v0.1.7
       with:
-        host: ${{ secrets.VPS_HOST }}
-        username: ${{ secrets.VPS_USER }}
-        key: ${{ secrets.VPS_SSH_KEY }}
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USER }}
+        key: ${{ secrets.SSH_KEY }}
         port: 22 # Port SSH standar VPS kamu
         source: "dist/*" # Jika pakai Vite, hasilnya ada di folder dist. Jika CRA, ganti jadi "build/*"
         target: "/var/www/my-react-app"
