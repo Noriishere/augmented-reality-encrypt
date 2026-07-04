@@ -1,0 +1,41 @@
+name: Deploy React App to VPS
+
+# Pemicu: Jalankan skrip ini setiap ada 'push' ke branch 'main'
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Ambil kode terbaru dari repository
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    # 2. Setup Node.js di server GitHub
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-node-version: 20 # Sesuikan dengan versi Node kamu
+        cache: 'npm'
+
+    # 3. Install dependencies dan build project React (Vite)
+    - name: Install and Build
+      run: |
+        npm install
+        npm run build
+
+    # 4. Unggah folder hasil build (dist) ke VPS menggunakan SFTP
+    - name: Deploy to VPS via SFTP
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        username: ${{ secrets.VPS_USER }}
+        key: ${{ secrets.VPS_SSH_KEY }}
+        port: 22 # Port SSH standar VPS kamu
+        source: "dist/*" # Jika pakai Vite, hasilnya ada di folder dist. Jika CRA, ganti jadi "build/*"
+        target: "/var/www/my-react-app"
+        strip_components: 1 # Menghilangkan folder 'dist' agar isinya langsung masuk ke target
