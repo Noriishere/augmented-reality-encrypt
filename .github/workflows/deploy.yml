@@ -19,7 +19,7 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-node-version: 20 # Sesuikan dengan versi Node kamu
+        node-version: 20 # Sesuikan dengan versi Node kamu
         cache: 'npm'
 
     # 3. Install dependencies dan build project React (Vite)
