@@ -50,6 +50,7 @@ function App() {
           {/* <audio id="bgm-javanese-cyber" src="/assets/gamelan-synth.mp3" preload="auto" loop="true"></audio> */}
 
           {/* Preload tekstur ruangan (.png) */}
+          <img id="tex-ceiling" src="/assets/ceiling.png" crossOrigin="anonymous" />
           <img id="tex-wall" src="/assets/wall.png" crossOrigin="anonymous" />
           <img id="tex-floor" src="/assets/floor.png" crossOrigin="anonymous" />
           <img id="tex-door" src="/assets/door.png" crossOrigin="anonymous" />
