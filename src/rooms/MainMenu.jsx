@@ -63,7 +63,7 @@ export default function MainMenu({ onSelectRoom }) {
       >
         {/* Bingkai Gerbang (Neon Glow) */}
         <a-box width="1.3" height="2.3" depth="0.05" color="#34d399" wireframe="true" position="0 0 0.02"></a-box>
-        <a-text value="Tingkat Dasar\n(SD)" align="center" position="0 0.2 0.1" color="#fff" scale="0.8 0.8 0.8"></a-text>
+        <a-text value="Raksha Basic\n(SD)" align="center" position="0 0.2 0.1" color="#fff" scale="0.8 0.8 0.8"></a-text>
       </a-box>
 
       {/* Gerbang 2: Raksha Beginner (SMP) - Tema Emas/Perunggu */}
@@ -78,7 +78,7 @@ export default function MainMenu({ onSelectRoom }) {
         onClick={() => onSelectRoom('Raksha Beginner')}
       >
         <a-box width="1.3" height="2.3" depth="0.05" color="#fbbf24" wireframe="true" position="0 0 0.02"></a-box>
-        <a-text value="Tingkat Menengah\n(SMP)" align="center" position="0 0.2 0.1" color="#fff" scale="0.8 0.8 0.8"></a-text>
+        <a-text value="Raksha Beginner\n(SMP)" align="center" position="0 0.2 0.1" color="#fff" scale="0.8 0.8 0.8"></a-text>
       </a-box>
 
       {/* Gerbang 3: Raksha Expert (SMK) - Tema Merah Delima */}
@@ -94,7 +94,7 @@ export default function MainMenu({ onSelectRoom }) {
         onClick={() => onSelectRoom('Raksha Expert')}
       >
         <a-box width="1.3" height="2.3" depth="0.05" color="#f87171" wireframe="true" position="0 0 0.02"></a-box>
-        <a-text value="Tingkat Lanjut\n(SMK)" align="center" position="0 0.2 0.1" color="#fff" scale="0.8 0.8 0.8"></a-text>
+        <a-text value="Raksha Expert\n(SMK)" align="center" position="0 0.2 0.1" color="#fff" scale="0.8 0.8 0.8"></a-text>
       </a-box>
 
     </a-entity>
