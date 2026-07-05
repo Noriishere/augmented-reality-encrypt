@@ -44,16 +44,16 @@ function App() {
       />
       <a-scene embedded style={{ width: '100%', height: '100%' }}>
 
-        {/* PINDAHKAN A-ASSETS KE SINI */}
-        <a-assets>
-          <audio
-            id="bgm-javanese-cyber"
-            src="/assets/gamelan-synth.mp3"
-            preload="auto"
-            loop="true"
-          ></audio>
-        </a-assets>
+        {/* --- FASE PRELOAD ASET (GAMBAR & AUDIO) --- */}
+        {/* timeout="10000" artinya sistem akan menunggu maksimal 10 detik untuk load file besar */}
+        <a-assets timeout="10000">
+          {/* <audio id="bgm-javanese-cyber" src="/assets/gamelan-synth.mp3" preload="auto" loop="true"></audio> */}
 
+          {/* Preload tekstur ruangan (.png) */}
+          <img id="tex-wall" src="/assets/wall.png" crossOrigin="anonymous" />
+          <img id="tex-floor" src="/assets/floor.png" crossOrigin="anonymous" />
+          <img id="tex-door" src="/assets/door.png" crossOrigin="anonymous" />
+        </a-assets>
         {/* --- ROUTING RUANGAN --- */}
         {currentRoom === 'LOBBY' && (
           <MainMenu onSelectRoom={(roomName) => setCurrentRoom(roomName)} />
