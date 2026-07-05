@@ -19,16 +19,29 @@ export default function MainMenu({ onSelectRoom }) {
                 roughness="0.2" // Memberikan efek sedikit memantulkan cahaya
             ></a-plane>
 
-            {/* 2. Langit-langit (Atap) */}
-            <a-plane
-                src="#tex-ceiling"
-                position="0 5 0"
-                rotation="95 0 0" /* Sedikit disesuaikan rotasinya agar menghadap ke bawah dengan pas */
-                width="15"
-                height="15"
-                repeat="2 2" /* Diulang 2x2 agar detail kayu Joglo dan neonnya terlihat proporsional dan megah */
-            ></a-plane>
+            {/* --- 2. ATAP JOGLO CYBER (Segiempat Mengerucut ke Atas) --- */}
+            <a-entity id="atap-joglo" position="0 5 0">
 
+                {/* Struktur Mengerucut Luar/Dalam */}
+                {/* segments-radial="4" mengubah kerucut menjadi piramida segiempat */}
+                {/* open-ended="false" memastikan pantat kerucut tertutup jika dilihat dari atas, 
+            tapi kita beri rotation 0 45 0 agar sudutnya pas dengan sudut ruangan (15x15) */}
+                <a-cone
+                    src="#tex-ceiling"
+                    position="0 2.5 0"
+                    radius-bottom="10.6" /* Lebar alas disesuaikan agar pas menutupi ruangan */
+                    radius-top="0"
+                    height="5" /* Tinggi kerucut ke atas */
+                    segments-radial="4"
+                    rotation="0 45 0" /* Putar 45 derajat agar sisi datarnya sejajar dengan dinding kotak */
+                    material="side: double; roughness: 0.4" /* side: double agar tekstur terlihat dari dalam dan luar */
+                    repeat="2 4"
+                ></a-cone>
+
+                {/* Lis Balok Kayu Penyangga Atas (Soko Guru Hologram) */}
+                {/* Ini elemen kosmetik biar makin terasa arsitektur Jawa Futuristic-nya */}
+                <a-box position="0 0 0" width="7.5" height="0.2" depth="7.5" color="#fbbf24" opacity="0.8" wireframe="true"></a-box>
+            </a-entity>
             {/* 3. Dinding Depan (Utara) */}
             <a-plane src="#tex-wall" position="0 2.5 -7.5" width="15" height="5" repeat="4 2"></a-plane>
 
