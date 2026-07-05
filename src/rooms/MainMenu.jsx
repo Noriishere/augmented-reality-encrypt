@@ -4,19 +4,7 @@ export default function MainMenu({ onSelectRoom }) {
   return (
     <a-entity id="raksha-haven">
       
-      {/* --- 1. ASET MEDIA (AUDIO & TEXTURES) --- */}
-      <a-assets>
-        {/* Pastikan kamu meletakkan file lagu mp3 di dalam folder: public/assets/ */}
-        <audio 
-          id="bgm-javanese-cyber" 
-          src="/assets/gamelan-synth.mp3" 
-          preload="auto" 
-          loop="true"
-        ></audio>
-      </a-assets>
-
-      {/* --- 2. PEMUTAR MUSIK LATAR (BGM) --- */}
-      {/* autoplay="true" akan memutar lagu saat lobby dimuat */}
+      {/* A-ASSETS DIHAPUS DARI SINI, TAPI SOUND TETAP ADA */}
       <a-sound 
         src="#bgm-javanese-cyber" 
         autoplay="true" 
@@ -25,8 +13,7 @@ export default function MainMenu({ onSelectRoom }) {
         position="0 2 -3"
       ></a-sound>
 
-      {/* --- 3. LINGKUNGAN (ENVIRONMENT) --- */}
-      {/* Langit malam gelap untuk menonjolkan efek neon hologram */}
+      {/* --- LINGKUNGAN (ENVIRONMENT) --- */}
       <a-sky color="#050308"></a-sky>
       
       {/* Lantai "Pendopo Cyber" - Warna kayu gelap keemasan */}

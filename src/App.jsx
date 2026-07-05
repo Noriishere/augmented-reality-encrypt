@@ -12,7 +12,7 @@ import MainMenu from './rooms/MainMenu';
 function App() {
   // Nilai awal diubah menjadi 'LOBBY' agar pemain masuk ke Main Menu terlebih dahulu
   const [currentRoom, setCurrentRoom] = useState('LOBBY');
-  
+
   const [showKeyboard, setShowKeyboard] = useState(false);
 
   // State untuk menyimpan PIN yang diketik user
@@ -42,11 +42,24 @@ function App() {
         isKeyboardOpen={showKeyboard}
         onToggleKeyboard={() => setShowKeyboard(!showKeyboard)}
       />
-
       <a-scene embedded style={{ width: '100%', height: '100%' }}>
-        
+
+        {/* PINDAHKAN A-ASSETS KE SINI */}
+        <a-assets>
+          <audio
+            id="bgm-javanese-cyber"
+            src="/assets/gamelan-synth.mp3"
+            preload="auto"
+            loop="true"
+          ></audio>
+        </a-assets>
+
         {/* --- ROUTING RUANGAN --- */}
-        
+        {currentRoom === 'LOBBY' && (
+          <MainMenu onSelectRoom={(roomName) => setCurrentRoom(roomName)} />
+        )}
+        {/* --- ROUTING RUANGAN --- */}
+
         {/* 1. LOBBY UTAMA */}
         {currentRoom === 'LOBBY' && (
           <MainMenu onSelectRoom={(roomName) => setCurrentRoom(roomName)} />
