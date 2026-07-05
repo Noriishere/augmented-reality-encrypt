@@ -3,8 +3,16 @@ import HUD from './components/HUD';
 import VirtualKeyboard from './components/VirtualKeyboard';
 import PlayerRig from './components/PlayerRig';
 
+// Import Ruangan
+import MainMenu from './rooms/MainMenu';
+// import RakshaBasic from './rooms/RakshaBasic';
+// import RakshaBeginner from './rooms/RakshaBeginner';
+// import RakshaExpert from './rooms/RakshaExpert';
+
 function App() {
-  const [currentRoom, setCurrentRoom] = useState('Raksha Basic');
+  // Nilai awal diubah menjadi 'LOBBY' agar pemain masuk ke Main Menu terlebih dahulu
+  const [currentRoom, setCurrentRoom] = useState('LOBBY');
+  
   const [showKeyboard, setShowKeyboard] = useState(false);
 
   // State untuk menyimpan PIN yang diketik user
@@ -16,7 +24,7 @@ function App() {
       setPin(''); // Hapus semua
     } else if (key === 'ENT') {
       alert(`Mencoba mendekripsi dengan sandi: ${pin}`);
-      // Nanti logika cek jawaban per-level taruh di sini
+      // Nanti logika cek jawaban per-level ditaruh di sini
       setPin('');
     } else {
       if (pin.length < 4) {
@@ -28,6 +36,7 @@ function App() {
   return (
     <div className="relative w-full h-screen overflow-hidden bg-black">
 
+      {/* HUD tetap muncul di semua ruangan */}
       <HUD
         currentRoom={currentRoom}
         isKeyboardOpen={showKeyboard}
@@ -35,7 +44,25 @@ function App() {
       />
 
       <a-scene embedded style={{ width: '100%', height: '100%' }}>
-        <a-sky color="#050b14"></a-sky>
+        
+        {/* --- ROUTING RUANGAN --- */}
+        
+        {/* 1. LOBBY UTAMA */}
+        {currentRoom === 'LOBBY' && (
+          <MainMenu onSelectRoom={(roomName) => setCurrentRoom(roomName)} />
+        )}
+
+        {/* 2. RUANGAN LEVEL (Aktifkan saat file-nya sudah dibuat) */}
+        {/* {currentRoom === 'Raksha Basic' && <RakshaBasic />} */}
+        {/* {currentRoom === 'Raksha Beginner' && <RakshaBeginner />} */}
+        {/* {currentRoom === 'Raksha Expert' && <RakshaExpert />} */}
+
+        {/* Placeholder langit untuk ruangan selain Lobby sementara komponen belum dibuat */}
+        {currentRoom !== 'LOBBY' && (
+          <a-sky color="#050b14"></a-sky>
+        )}
+
+        {/* --- KOMPONEN GLOBAL --- */}
 
         {/* Render Virtual Keyboard jika HUD ditekan */}
         {showKeyboard && (
@@ -47,7 +74,7 @@ function App() {
           />
         )}
 
-        {/* --- Player Rig Lengkap (PC, HP & VR) --- */}
+        {/* Player Rig Lengkap (PC, HP & VR) */}
         <PlayerRig
           isKeyboardOpen={showKeyboard}
           onToggleKeyboard={() => setShowKeyboard(!showKeyboard)}
