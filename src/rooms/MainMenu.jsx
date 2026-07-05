@@ -56,7 +56,7 @@ export default function MainMenu({ onSelectRoom }) {
           animation__leave="property: scale; to: 1 1 1; startEvents: mouseleave; dur: 200"
           onClick={() => onSelectRoom('Raksha Basic')}
         ></a-image>
-        <a-text value="Tingkat Dasar\n(SD)" align="center" position="0 1.6 0.1" color="#fff" scale="0.8 0.8 0.8"></a-text>
+        <a-text value="Raksha Basic\n(SD)" align="center" position="0 1.6 0.1" color="#fff" scale="0.8 0.8 0.8"></a-text>
       </a-entity>
 
       {/* Gerbang 2: Raksha Beginner */}
@@ -69,7 +69,7 @@ export default function MainMenu({ onSelectRoom }) {
           animation__leave="property: scale; to: 1 1 1; startEvents: mouseleave; dur: 200"
           onClick={() => onSelectRoom('Raksha Beginner')}
         ></a-image>
-        <a-text value="Tingkat Menengah\n(SMP)" align="center" position="0 1.6 0.1" color="#fff" scale="0.8 0.8 0.8"></a-text>
+        <a-text value="Raksha Beginner\n(SMP)" align="center" position="0 1.6 0.1" color="#fff" scale="0.8 0.8 0.8"></a-text>
       </a-entity>
 
       {/* Gerbang 3: Raksha Expert */}
@@ -82,7 +82,7 @@ export default function MainMenu({ onSelectRoom }) {
           animation__leave="property: scale; to: 1 1 1; startEvents: mouseleave; dur: 200"
           onClick={() => onSelectRoom('Raksha Expert')}
         ></a-image>
-        <a-text value="Tingkat Lanjut\n(SMK)" align="center" position="0 1.6 0.1" color="#fff" scale="0.8 0.8 0.8"></a-text>
+        <a-text value="Raksha Expert\n(SMK)" align="center" position="0 1.6 0.1" color="#fff" scale="0.8 0.8 0.8"></a-text>
       </a-entity>
 
     </a-entity>
