@@ -9,21 +9,16 @@ function App() {
   const [showKeyboard, setShowKeyboard] = useState(false);
   const [pin, setPin] = useState('');
   const [isVRMode, setIsVRMode] = useState(false);
-  
-  // State baru untuk melacak status Fullscreen PC/HP
   const [isFullscreen, setIsFullscreen] = useState(false);
   
   const sceneRef = useRef(null);
 
-  // Efek untuk memantau mode VR dan Fullscreen biasa
   useEffect(() => {
     const sceneEl = sceneRef.current;
     if (!sceneEl) return;
 
     const handleEnterVR = () => setIsVRMode(true);
     const handleExitVR = () => setIsVRMode(false);
-
-    // Memantau jika user menekan ESC untuk keluar dari fullscreen
     const handleFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement);
     };
@@ -39,7 +34,6 @@ function App() {
     };
   }, []);
 
-  // Logika untuk tombol Fullscreen (Hanya berlaku di non-VR)
   const toggleFullScreen = () => {
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen().catch((err) => {
@@ -72,36 +66,39 @@ function App() {
         currentRoom={currentRoom}
         isKeyboardOpen={showKeyboard}
         onToggleKeyboard={() => setShowKeyboard(!showKeyboard)}
-        /* Kirim state dan fungsi fullscreen ke HUD */
         isFullscreen={isFullscreen}
         onToggleFullscreen={toggleFullScreen}
       />
       
       <a-scene ref={sceneRef} embedded style={{ width: '100%', height: '100%' }}>
 
-        <a-assets timeout="10000">
-          <audio id="bgm-javanese-cyber" src="/assets/gamelan-synth.mp3" preload="auto" loop="true"></audio>
-          <img id="tex-wall" src="/assets/wall.png" crossOrigin="anonymous" />
-          <img id="tex-floor" src="/assets/floor.png" crossOrigin="anonymous" />
-          <img id="tex-door" src="/assets/door.png" crossOrigin="anonymous" />
-          <img id="tex-ceiling" src="/assets/ceiling.png" crossOrigin="anonymous" />
+        {/* === ASET DATA CENTER === */}
+        <a-assets timeout="15000">
+          {/* Tekstur Data Center */}
+          <img id="tex-dc-floor" src="/assets/dc_floor.png" crossOrigin="anonymous" />
+          <img id="tex-dc-wall" src="/assets/dc_wall.png" crossOrigin="anonymous" />
+          <img id="tex-dc-ceiling" src="/assets/dc_ceiling.png" crossOrigin="anonymous" />
+          <img id="tex-dc-rack" src="/assets/dc_rack_face.png" crossOrigin="anonymous" />
+          <img id="tex-dc-rack-hd" src="/assets/dc_rack_face_hd.png" crossOrigin="anonymous" />
+          <img id="tex-dc-panel" src="/assets/dc_access_panel.png" crossOrigin="anonymous" />
+          <img id="tex-dc-door" src="/assets/dc_door_industrial_hd.png" crossOrigin="anonymous" />
+          <img id="tex-dc-server" src="/assets/dc_server_panel_hd.png" crossOrigin="anonymous" />
+          <img id="tex-dc-keypad" src="/assets/dc_keypad_panel_hd.png" crossOrigin="anonymous" />
+          <img id="tex-dc-hvac" src="/assets/dc_hvac.png" crossOrigin="anonymous" />
+
+
         </a-assets>
 
-        <a-sound
-          src="#bgm-javanese-cyber"
-          autoplay="true"
-          loop="true"
-          volume="0.4"
-        ></a-sound>
-
+        {/* === STATE ROUTER === */}
         {currentRoom === 'LOBBY' && (
           <MainMenu onSelectRoom={(roomName) => setCurrentRoom(roomName)} />
         )}
 
         {currentRoom !== 'LOBBY' && (
-          <a-sky color="#050b14"></a-sky>
+          <a-sky color="#0a0e14"></a-sky>
         )}
 
+        {/* === VIRTUAL KEYBOARD === */}
         {showKeyboard && (
           <VirtualKeyboard
             position="0 1 -2"

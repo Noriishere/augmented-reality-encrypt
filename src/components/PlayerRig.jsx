@@ -4,7 +4,7 @@ export default function PlayerRig({ isKeyboardOpen, onToggleKeyboard, isVRMode }
     <a-entity id="rig" position="0 0 0">
       
       <a-camera 
-        position="0 1.6 0" 
+        position="0 1.6 0"
         look-controls="pointerLockEnabled: false"
         wasd-controls="enabled: false"
       >
