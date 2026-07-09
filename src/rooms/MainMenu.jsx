@@ -6,8 +6,8 @@ import React, { useState } from 'react';
 function ServerRack({ position, rotation = "0 0 0" }) {
     return (
         <a-entity position={position} rotation={rotation}>
-            {/* Frame utama */}
-            <a-box position="0 1.4 0" width="0.9" height="2.8" depth="0.65"
+            {/* Cukup tambahkan className="solid" pada boks utamanya */}
+            <a-box className="solid" position="0 1.4 0" width="0.9" height="2.8" depth="0.65"
                 color="#1a1e24" material="roughness: 0.3; metalness: 0.7"></a-box>
             {/* Front panel texture */}
             <a-plane position="0 1.4 0.33" width="0.8" height="2.7"
@@ -78,14 +78,10 @@ export default function MainMenu({ onSelectRoom }) {
                 material="src: #tex-dc-ceiling; repeat: 5 5; roughness: 0.8; side: double"></a-plane>
 
             {/* ========== DINDING ========== */}
-            <a-plane position="0 2.5 -7.5" width="16" height="5"
-                material="src: #tex-dc-wall; repeat: 4 1; roughness: 0.8"></a-plane>
-            <a-plane position="0 2.5 7.5" rotation="0 180 0" width="16" height="5"
-                material="src: #tex-dc-wall; repeat: 4 1; roughness: 0.8"></a-plane>
-            <a-plane position="-7.5 2.5 0" rotation="0 90 0" width="16" height="5"
-                material="src: #tex-dc-wall; repeat: 4 1; roughness: 0.8"></a-plane>
-            <a-plane position="7.5 2.5 0" rotation="0 -90 0" width="16" height="5"
-                material="src: #tex-dc-wall; repeat: 4 1; roughness: 0.8"></a-plane>
+            <a-plane className="solid" position="0 2.5 -7.5" width="16" height="5" material="src: #tex-dc-wall; repeat: 4 1; roughness: 0.8"></a-plane>
+            <a-plane className="solid" position="0 2.5 7.5" rotation="0 180 0" width="16" height="5" material="src: #tex-dc-wall; repeat: 4 1; roughness: 0.8"></a-plane>
+            <a-plane className="solid" position="-7.5 2.5 0" rotation="0 90 0" width="16" height="5" material="src: #tex-dc-wall; repeat: 4 1; roughness: 0.8"></a-plane>
+            <a-plane className="solid" position="7.5 2.5 0" rotation="0 -90 0" width="16" height="5" material="src: #tex-dc-wall; repeat: 4 1; roughness: 0.8"></a-plane>
 
             {/* Baseboard */}
             <a-box position="0 0.1 -7.4" width="15.6" height="0.2" depth="0.12" color="#475569" material="roughness: 0.5; metalness: 0.4"></a-box>
