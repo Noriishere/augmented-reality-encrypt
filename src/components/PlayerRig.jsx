@@ -126,3 +126,51 @@ if (typeof AFRAME !== 'undefined' && !AFRAME.components['free-move']) {
         }
     });
 }
+
+export default function PlayerRig({ isKeyboardOpen, onToggleKeyboard, isVRMode, vrHudTexture, onVRTerminalClick }) {
+    const hudRef = useRef(null);
+    const terminalRef = useRef(null);
+
+    useEffect(() => {
+        if (hudRef.current && vrHudTexture) {
+            const mesh = hudRef.current.getObject3D('mesh');
+            if (mesh) { mesh.material.map = vrHudTexture; mesh.material.needsUpdate = true; }
+        }
+    }, [vrHudTexture]);
+
+    useEffect(() => {
+        if (!terminalRef.current || !isVRMode) return;
+        const el = terminalRef.current;
+        const handleClick = (e) => { e.stopPropagation(); if (onVRTerminalClick) onVRTerminalClick(); };
+        el.addEventListener('click', handleClick);
+        el.addEventListener('mousedown', handleClick);
+        return () => { el.removeEventListener('click', handleClick); el.removeEventListener('mousedown', handleClick); };
+    }, [isVRMode, onVRTerminalClick]);
+
+    return (
+        <a-entity id="rig" position="0 0 0">
+            <a-camera position="0 1.6 0"
+                look-controls="pointerLockEnabled: false; touchEnabled: true"
+                free-move={`speed: 0.1; enabled: ${!isKeyboardOpen}`}>
+                <a-cursor raycaster="objects: .clickable; far: 100" color="#22d3ee"
+                    animation__click="property: scale; startEvents: click; from: 0.2 0.2 0.2; to: 1 1 1"
+                    animation__mouseenter="property: scale; startEvents: mouseenter; to: 1.5 1.5 1.5"
+                    animation__mouseleave="property: scale; startEvents: mouseleave; to: 1 1 1"></a-cursor>
+                {isVRMode && (
+                    <a-entity position="0 0.15 -0.7">
+                        <a-plane ref={hudRef} width="2.2" height="1.1"
+                            material="shader: flat; transparent: true; side: double; alphaTest: 0.01"></a-plane>
+                        <a-box ref={terminalRef} className="clickable" position="0 -0.38 0.03"
+                            width="0.6" height="0.06" depth="0.02"
+                            material="color: #06b6d4; opacity: 0.04; transparent: true"
+                            onClick={onVRTerminalClick}></a-box>
+                    </a-entity>
+                )}
+            </a-camera>
+            <a-entity laser-controls="hand: left" raycaster="objects: .clickable; far: 20"
+                line="color: #22d3ee; opacity: 0.6"></a-entity>
+            <a-entity laser-controls="hand: right" raycaster="objects: .clickable; far: 20"
+                line="color: #22d3ee; opacity: 0.6"></a-entity>
+        </a-entity>
+    );
+}
