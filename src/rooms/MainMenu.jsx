@@ -158,7 +158,7 @@ export default function MainMenu({ onSelectRoom }) {
             </a-entity>
             <KeypadPanel position="-7.0 1.1 1.5" rotation="0 90 0" onClick={() => onSelectRoom('Raksha Basic')} />
             {/* Server putih samping keypad kiri */}
-            <a-box position="-6.8 1 -2.2" width="0.7" height="1.8" depth="1" color="#e8ecf0" material="roughness: 0.4; metalness: 0.3"></a-box>
+            <a-box class="solid" position="-6.8 1 -2.2" width="0.7" height="1.8" depth="1" color="#e8ecf0" material="roughness: 0.4; metalness: 0.3"></a-box>
             <a-plane position="-6.44 1 -2.2" rotation="0 90 0" width="0.95" height="1.7"
                 material="src: #tex-dc-server; roughness: 0.4; metalness: 0.2"></a-plane>
 
@@ -173,7 +173,7 @@ export default function MainMenu({ onSelectRoom }) {
             </a-entity>
             <KeypadPanel position="1.5 1.1 7.0" rotation="0 180 0" onClick={() => onSelectRoom('Raksha Beginner')} />
             {/* Server putih samping keypad depan */}
-            <a-box position="-2.2 1 6.8" width="1" height="1.8" depth="0.7" color="#e8ecf0" material="roughness: 0.4; metalness: 0.3"></a-box>
+            <a-box class="solid" position="-2.2 1 6.8" width="1" height="1.8" depth="0.7" color="#e8ecf0" material="roughness: 0.4; metalness: 0.3"></a-box>
             <a-plane position="-2.2 1 6.44" rotation="0 180 0" width="0.95" height="1.7"
                 material="src: #tex-dc-server; roughness: 0.4; metalness: 0.2"></a-plane>
 
@@ -188,7 +188,7 @@ export default function MainMenu({ onSelectRoom }) {
             </a-entity>
             <KeypadPanel position="7.0 1.1 -1.5" rotation="0 -90 0" onClick={() => onSelectRoom('Raksha Expert')} />
             {/* Server putih samping keypad kanan */}
-            <a-box position="6.8 1 2.2" width="0.7" height="1.8" depth="1" color="#e8ecf0" material="roughness: 0.4; metalness: 0.3"></a-box>
+            <a-box class="solid" position="6.8 1 2.2" width="0.7" height="1.8" depth="1" color="#e8ecf0" material="roughness: 0.4; metalness: 0.3"></a-box>
             <a-plane position="6.44 1 2.2" rotation="0 -90 0" width="0.95" height="1.7"
                 material="src: #tex-dc-server; roughness: 0.4; metalness: 0.2"></a-plane>
 
