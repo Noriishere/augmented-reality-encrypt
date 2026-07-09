@@ -194,8 +194,8 @@ export default function MainMenu({ onSelectRoom }) {
 
             {/* ========== PAPAN INFORMASI (Utara / Belakang) ========== */}
             <a-entity id="area-tutorial" position="0 0 -7.3" rotation="0 0 0">
-                <a-box position="0 1.5 0.1" width="4.5" height="3" depth="0.1" color="#475569" material="roughness: 0.4; metalness: 0.5"></a-box>
-                <a-box position="0 1.5 0.15" width="4.2" height="2.7" depth="0.05" color="#0f172a"></a-box>
+                <a-box class="solid" position="0 1.5 0.1" width="4.5" height="3" depth="0.1" color="#475569" material="roughness: 0.4; metalness: 0.5"></a-box>
+                <a-box class="solid" position="0 1.5 0.15" width="4.2" height="2.7" depth="0.05" color="#0f172a"></a-box>
                 <a-text
                     value={"PETUNJUK KADET\n\n1. Pilih pintu berdasarkan tingkat:\n   HIJAU  = BASIC (SD)\n   KUNING = BEGINNER (SMP)\n   MERAH  = EXPERT (SMK)\n\n2. Sentuh KEYPAD di samping pintu\n\n3. Selesaikan misi keamanan data!"}
                     position="0 1.5 0.2" align="center" color="#48f542"
