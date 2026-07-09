@@ -15,7 +15,7 @@ if (typeof AFRAME !== 'undefined' && !AFRAME.components['free-move']) {
             this.onKeyDown = (e) => { this.keys[e.code] = true; };
             this.onKeyUp = (e) => { this.keys[e.code] = false; };
             window.addEventListener('keydown', this.onKeyDown);
-            window.addEventListener('keyup', this.onKeyUp);
+            window.addEventListener('keyup', this.onKeyUp); 
             this.el.addEventListener('axismove', (e) => {
                 const axis = e.detail.axis;
                 this.axisX = Math.abs(axis[0]) > 0.1 ? axis[0] : 0;
