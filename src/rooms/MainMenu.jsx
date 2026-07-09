@@ -69,6 +69,10 @@ export default function MainMenu({ onSelectRoom }) {
             <a-plane position="0 0 0" rotation="-90 0 0" width="16" height="16"
                 material="src: #tex-dc-floor; repeat: 4 4; roughness: 0.6; metalness: 0.1"></a-plane>
 
+            {/* ========== NAVMESH — area yang boleh diinjak player ========== */}
+            <a-plane position="0 0.01 0" rotation="-90 0 0" width="14" height="14"
+                nav-mesh visible="false"></a-plane>
+
             {/* ========== LANGIT-LANGIT ========== */}
             <a-plane position="0 5.1 0" rotation="90 0 0" width="18" height="18"
                 material="src: #tex-dc-ceiling; repeat: 5 5; roughness: 0.8; side: double"></a-plane>
