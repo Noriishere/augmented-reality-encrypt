@@ -349,6 +349,10 @@ function App() {
           isVRMode={isVRMode}
           vrHudTexture={vrHudTexture}
           onVRTerminalClick={handleVRTerminalClick}
+
+          // Tambahkan 2 baris ini di App.jsx kamu:
+          currentInput={pin}
+          handleVirtualKeyPress={handleVirtualKeyPress}
         />
       </a-scene>
     </div>
