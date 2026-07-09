@@ -7,7 +7,7 @@ function ServerRack({ position, rotation = "0 0 0" }) {
     return (
         <a-entity position={position} rotation={rotation}>
             {/* Cukup tambahkan className="solid" pada boks utamanya */}
-            <a-box className="solid" position="0 1.4 0" width="0.9" height="2.8" depth="0.65"
+            <a-box class="solid" position="0 1.4 0" width="0.9" height="2.8" depth="0.65"
                 color="#1a1e24" material="roughness: 0.3; metalness: 0.7"></a-box>
             {/* Front panel texture */}
             <a-plane position="0 1.4 0.33" width="0.8" height="2.7"
@@ -78,10 +78,10 @@ export default function MainMenu({ onSelectRoom }) {
                 material="src: #tex-dc-ceiling; repeat: 5 5; roughness: 0.8; side: double"></a-plane>
 
             {/* ========== DINDING ========== */}
-            <a-plane className="solid" position="0 2.5 -7.5" width="16" height="5" material="src: #tex-dc-wall; repeat: 4 1; roughness: 0.8"></a-plane>
-            <a-plane className="solid" position="0 2.5 7.5" rotation="0 180 0" width="16" height="5" material="src: #tex-dc-wall; repeat: 4 1; roughness: 0.8"></a-plane>
-            <a-plane className="solid" position="-7.5 2.5 0" rotation="0 90 0" width="16" height="5" material="src: #tex-dc-wall; repeat: 4 1; roughness: 0.8"></a-plane>
-            <a-plane className="solid" position="7.5 2.5 0" rotation="0 -90 0" width="16" height="5" material="src: #tex-dc-wall; repeat: 4 1; roughness: 0.8"></a-plane>
+            <a-plane class="solid" position="0 2.5 -7.5" width="16" height="5" material="src: #tex-dc-wall; repeat: 4 1; roughness: 0.8"></a-plane>
+            <a-plane class="solid" position="0 2.5 7.5" rotation="0 180 0" width="16" height="5" material="src: #tex-dc-wall; repeat: 4 1; roughness: 0.8"></a-plane>
+            <a-plane class="solid" position="-7.5 2.5 0" rotation="0 90 0" width="16" height="5" material="src: #tex-dc-wall; repeat: 4 1; roughness: 0.8"></a-plane>
+            <a-plane class="solid" position="7.5 2.5 0" rotation="0 -90 0" width="16" height="5" material="src: #tex-dc-wall; repeat: 4 1; roughness: 0.8"></a-plane>
 
             {/* Baseboard */}
             <a-box position="0 0.1 -7.4" width="15.6" height="0.2" depth="0.12" color="#475569" material="roughness: 0.5; metalness: 0.4"></a-box>
@@ -92,7 +92,7 @@ export default function MainMenu({ onSelectRoom }) {
             {/* ========== PILAR SUDUT ========== */}
             {[[-7.3, -7.3], [7.3, -7.3], [-7.3, 7.3], [7.3, 7.3]].map(([x, z], i) => (
                 <a-box key={`p-${i}`} position={`${x} 2.5 ${z}`} width="0.6" height="5" depth="0.6"
-                    color="#64748b" material="roughness: 0.5; metalness: 0.4"></a-box>
+                    color="#64748b" class="solid" material="roughness: 0.5; metalness: 0.4"></a-box>
             ))}
 
             {/* ========== AC CENTRAL ========== */}
@@ -147,7 +147,7 @@ export default function MainMenu({ onSelectRoom }) {
             {/* ========== PINTU BARAT (Kiri) - RAKSHA BASIC ========== */}
             <a-entity id="area-sd" position="-7.3 0 0" rotation="0 90 0">
                 {/* Kusen pintu */}
-                <a-box position="0 1.5 0" width="2.4" height="3.4" depth="0.15" color="#334155" material="roughness: 0.4; metalness: 0.5"></a-box>
+                <a-box class="solid" position="0 1.5 0" width="2.4" height="3.4" depth="0.15" color="#334155" material="roughness: 0.4; metalness: 0.5"></a-box>
                 {/* Pintu sliding texture */}
                 <a-plane position="0 1.5 0.09" width="2.1" height="3.1"
                     material="src: #tex-dc-door; roughness: 0.5; metalness: 0.4"></a-plane>
@@ -164,7 +164,7 @@ export default function MainMenu({ onSelectRoom }) {
 
             {/* ========== PINTU SELATAN (Depan) - RAKSHA BEGINNER ========== */}
             <a-entity id="area-smp" position="0 0 7.3" rotation="0 180 0">
-                <a-box position="0 1.5 0" width="2.4" height="3.4" depth="0.15" color="#334155" material="roughness: 0.4; metalness: 0.5"></a-box>
+                <a-box class="solid" position="0 1.5 0" width="2.4" height="3.4" depth="0.15" color="#334155" material="roughness: 0.4; metalness: 0.5"></a-box>
                 <a-plane position="0 1.5 0.09" width="2.1" height="3.1"
                     material="src: #tex-dc-door; roughness: 0.5; metalness: 0.4"></a-plane>
                 <a-box position="0 3.5 0.1" width="3.5" height="0.65" depth="0.1" color="#ca8a04" material="emissive: #713f12; emissiveIntensity: 0.3"></a-box>
@@ -179,7 +179,7 @@ export default function MainMenu({ onSelectRoom }) {
 
             {/* ========== PINTU TIMUR (Kanan) - RAKSHA EXPERT ========== */}
             <a-entity id="area-smk" position="7.3 0 0" rotation="0 -90 0">
-                <a-box position="0 1.5 0" width="2.4" height="3.4" depth="0.15" color="#334155" material="roughness: 0.4; metalness: 0.5"></a-box>
+                <a-box class="solid" position="0 1.5 0" width="2.4" height="3.4" depth="0.15" color="#334155" material="roughness: 0.4; metalness: 0.5"></a-box>
                 <a-plane position="0 1.5 0.09" width="2.1" height="3.1"
                     material="src: #tex-dc-door; roughness: 0.5; metalness: 0.4"></a-plane>
                 <a-box position="0 3.5 0.1" width="3.2" height="0.65" depth="0.1" color="#dc2626" material="emissive: #7f1d1d; emissiveIntensity: 0.3"></a-box>
