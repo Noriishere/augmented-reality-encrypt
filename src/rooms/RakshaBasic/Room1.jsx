@@ -12,28 +12,22 @@ function InnerRoom({ position, rotation = "0 0 0", isLeftRoom }) {
     const roomDepth = 8;
     const roomHeight = 5;
 
-    // Menentukan di sisi mana letak celah pintu masuk (menghadap lorong tengah)
     const doorWallX = isLeftRoom ? (roomWidth / 2) : -(roomWidth / 2);
     const outerWallX = isLeftRoom ? -(roomWidth / 2) : (roomWidth / 2);
 
     return (
         <a-entity position={position} rotation={rotation}>
-            {/* Atap Ruangan */}
             <a-box class="solid" position="0 4.9 0" width={roomWidth} height="0.2" depth={roomDepth} color="#0f172a"></a-box>
 
-            {/* Dinding Depan & Belakang */}
             <a-box class="solid" position={`0 2.5 ${roomDepth/2}`} width={roomWidth} height={roomHeight} depth={wallThickness} color={wallColor} material={wallMat}></a-box>
             <a-box class="solid" position={`0 2.5 ${-roomDepth/2}`} width={roomWidth} height={roomHeight} depth={wallThickness} color={wallColor} material={wallMat}></a-box>
 
-            {/* Dinding Sisi Luar Tertutup Rapat */}
             <a-box class="solid" position={`${outerWallX} 2.5 0`} width={wallThickness} height={roomHeight} depth={roomDepth} color={wallColor} material={wallMat}></a-box>
 
-            {/* Dinding Sisi Dalam (Diberi Celah Pintu Masuk di tengah) */}
             <a-box class="solid" position={`${doorWallX} 2.5 -2.5`} width={wallThickness} height={roomHeight} depth="3" color={wallColor} material={wallMat}></a-box>
             <a-box class="solid" position={`${doorWallX} 2.5 2.5`} width={wallThickness} height={roomHeight} depth="3" color={wallColor} material={wallMat}></a-box>
             <a-box class="solid" position={`${doorWallX} 4 0`} width={wallThickness} height="2" depth="2" color={wallColor} material={wallMat}></a-box>
 
-            {/* Garis Neon Bawah */}
             <a-box position="0 0.15 0" width={roomWidth + 0.1} height="0.1" depth={roomDepth + 0.1} color="#0284c7" material="emissive: #0284c7; emissiveIntensity: 0.3" opacity="0.8"></a-box>
         </a-entity>
     );
@@ -78,13 +72,49 @@ function AudioTerminal({ position, rotation = "0 0 0" }) {
 }
 
 /* ============================================================
+   KOMPONEN 3: DINDING OKTAGON (Collider Invisible)
+   ============================================================ */
+function OctagonWalls() {
+    // Jarak titik-tengah tiap sisi ke pusat (apothem), sedikit di luar radius visual 13
+    // supaya nempel pas dengan cylinder dinding visual
+    const APOTHEM = 12.02;
+    const SIDE_LENGTH = 9.95;
+
+    const walls = Array.from({ length: 8 }, (_, i) => {
+        const angleDeg = i * 45;
+        const angleRad = (angleDeg * Math.PI) / 180;
+        return {
+            x: APOTHEM * Math.sin(angleRad),
+            z: APOTHEM * Math.cos(angleRad),
+            rotY: angleDeg,
+        };
+    });
+
+    return (
+        <>
+            {walls.map((wall, i) => (
+                <a-box
+                    key={`oct-wall-${i}`}
+                    class="solid"
+                    position={`${wall.x} 2.5 ${wall.z}`}
+                    rotation={`0 ${wall.rotY} 0`}
+                    width={SIDE_LENGTH}
+                    height="5"
+                    depth="0.3"
+                    visible="false"
+                ></a-box>
+            ))}
+        </>
+    );
+}
+
+/* ============================================================
    KOMPONEN UTAMA: RUANGAN 1 (RAKSHA BASIC)
    ============================================================ */
 export default function Room1({ onInteractTerminal }) {
     const [showPopup, setShowPopup] = useState(true);
 
     useEffect(() => {
-        // kasih waktu 1 frame biar DOM bener-bener ke-attach dulu
         const raf = requestAnimationFrame(() => {
             document.querySelector('a-scene')?.emit('refresh-solids');
         });
@@ -101,11 +131,14 @@ export default function Room1({ onInteractTerminal }) {
             <a-light type="point" color="#22c55e" intensity="0.7" position="0 3 -10" distance="10" decay="2"></a-light>
 
             {/* --- ARSITEKTUR OKTAGON (Dinding Terluar) --- */}
-            <a-cylinder class="solid" position="0 0 0" radius="13" height="0.1" segments-radial="8" color="#020617" material="src: #tex-dc-floor; repeat: 8 8; roughness: 0.6; metalness: 0.2"></a-cylinder>
+            <a-cylinder position="0 0 0" radius="13" height="0.1" segments-radial="8" color="#020617" material="src: #tex-dc-floor; repeat: 8 8; roughness: 0.6; metalness: 0.2"></a-cylinder>
             
             <a-cylinder position="0 2.5 0" radius="13" height="5" segments-radial="8" side="back" open-ended="true" color="#1e293b" material="src: #tex-dc-wall; repeat: 10 2; roughness: 0.8"></a-cylinder>
             
             <a-cylinder position="0 5 0" radius="13" height="0.1" segments-radial="8" color="#0f172a" material="src: #tex-dc-ceiling; repeat: 6 6; roughness: 0.9"></a-cylinder>
+
+            {/* Collider oktagon: 8 dinding datar invisible mengelilingi ruangan */}
+            <OctagonWalls />
 
 
             {/* ==========================================================
@@ -133,8 +166,6 @@ export default function Room1({ onInteractTerminal }) {
                 ========================================================== */}
             <InnerRoom position="-4.5 0 -1" isLeftRoom={true} />
             
-            {/* Teks Rahasia diletakkan persis di dinding DALAM bagian utara ruangan kiri */}
-            {/* Rotation 0 0 0 agar teks menghadap ke arah pemain saat mereka masuk */}
             <a-entity position="-4.5 2 -4.8" rotation="0 0 0">
                 <a-plane position="0 0 -0.01" width="3" height="1.5" color="#000000" opacity="0.6"></a-plane>
                 
@@ -151,7 +182,6 @@ export default function Room1({ onInteractTerminal }) {
                 ========================================================== */}
             <InnerRoom position="4.5 0 -1" isLeftRoom={false} />
             
-            {/* Terminal diletakkan di tengah-tengah ruang kanan, diputar -90 agar layarnya menghadap pintu */}
             <AudioTerminal position="4.5 0 -1" rotation="0 -90 0" />
 
 
