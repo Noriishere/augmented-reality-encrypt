@@ -19,18 +19,18 @@ function InnerRoom({ position, rotation = "0 0 0", isLeftRoom, cipher1 = "#tex-d
             {/* Meja Utama */}
             <a-box class="solid" position="0 0.78 0" width="1.4" height="0.06" depth="0.8"
                 material="src: #tex-dc-desk; roughness: 0.5; metalness: 0.1"></a-box>
-            
+
             {/* Papan Belakang (Pembatas Meja) */}
             <a-box position="0 0.75 -0.38" width="1.4" height="0.75" depth="0.04"
                 material="src: #tex-dc-desk; roughness: 0.5; metalness: 0.1"></a-box>
-            
+
             {/* Kaki Meja */}
             <a-box position="-0.6 0.37 0" width="0.08" height="0.75" depth="0.6" color="#505862" material="roughness: 0.4; metalness: 0.5"></a-box>
             <a-box position="0.6 0.37 0" width="0.08" height="0.75" depth="0.6" color="#505862" material="roughness: 0.4; metalness: 0.5"></a-box>
-            
+
             {/* Panel penutup bawah meja (Modesty panel) */}
             <a-box position="0 0.4 -0.35" width="1.3" height="0.35" depth="0.03" color="#334155"></a-box>
-            
+
             {/* Monitor */}
             <a-box position="0 1.25 -0.15" width="0.8" height="0.5" depth="0.05" color="#1a1e24"
                 material="roughness: 0.3; metalness: 0.4"></a-box>
@@ -39,13 +39,13 @@ function InnerRoom({ position, rotation = "0 0 0", isLeftRoom, cipher1 = "#tex-d
                 material={`src: ${screenTex}; roughness: 0.3; metalness: 0.2`}></a-plane>
             <a-box position="0 0.95 -0.15" width="0.1" height="0.25" depth="0.1" color="#334155" material="roughness: 0.4; metalness: 0.5"></a-box>
             <a-box position="0 0.85 -0.15" width="0.25" height="0.03" depth="0.2" color="#334155"></a-box>
-            
+
             {/* Keyboard + Mouse */}
             <a-box position="0 0.82 0.12" width="0.45" height="0.02" depth="0.18"
                 material="src: #tex-dc-keyboard; roughness: 0.5"></a-box>
             <a-box position="0.3 0.82 0.15" width="0.1" height="0.02" depth="0.15"
                 material="src: #tex-dc-mouse; roughness: 0.4"></a-box>
-            
+
             {/* Kursi */}
             <a-box position="0 0.5 0.75" width="0.55" height="0.08" depth="0.55"
                 material="src: #tex-dc-chair; roughness: 0.7"></a-box>
@@ -80,7 +80,7 @@ function InnerRoom({ position, rotation = "0 0 0", isLeftRoom, cipher1 = "#tex-d
             {/* Baris kanan — menghadap tengah (semua normal) */}
             <ComputerStation x={1.2} z={-3} rot={180} screenTex={cipher2} />
             <ComputerStation x={1.2} z={-0.5} rot={180} />
-            <ComputerStation x={1.2} z={2} rot={180}  />
+            <ComputerStation x={1.2} z={2} rot={180} />
             <ComputerStation x={1.2} z={4} rot={180} />
 
         </a-entity>
@@ -123,17 +123,32 @@ function AudioTerminal({ position, rotation = "0 0 0" }) {
    ============================================================ */
 function OctagonWalls() {
     const RADIUS = 14;
+    const SIDE = 2 * RADIUS * Math.sin(Math.PI / 8); // panjang sisi octagon
+
     const walls = Array.from({ length: 8 }, (_, i) => {
         const angleDeg = i * 45;
-        const angleRad = (angleDeg * Math.PI) / 180;
-        return { x: RADIUS * Math.sin(angleRad), z: RADIUS * Math.cos(angleRad), rotY: angleDeg };
+        const angleRad = angleDeg * Math.PI / 180;
+
+        return {
+            x: RADIUS * Math.sin(angleRad),
+            z: RADIUS * Math.cos(angleRad),
+            rotY: angleDeg
+        };
     });
+
     return (
         <>
             {walls.map((wall, i) => (
-                <a-box key={`oct-${i}`} class="solid"
-                    position={`${wall.x} 2.5 ${wall.z}`} rotation={`0 ${wall.rotY} 0`}
-                    width={RADIUS * 1.1} height="5" depth="0.5" visible="false"></a-box>
+                <a-box
+                    key={`oct-${i}`}
+                    class="solid"
+                    position={`${wall.x} 2.5 ${wall.z}`}
+                    rotation={`0 ${wall.rotY} 0`}
+                    width={SIDE}
+                    height="5"
+                    depth="0.5"
+                    visible="false"
+                />
             ))}
         </>
     );
