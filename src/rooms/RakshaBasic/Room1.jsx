@@ -97,11 +97,16 @@ export default function Room1({ onInteractTerminal }) {
             <a-cylinder position="0 2.5 0" radius="13" height="5" segments-radial="8" side="back" open-ended="true" color="#1e293b" material="src: #tex-dc-wall; repeat: 10 2; roughness: 0.8"></a-cylinder>
             <a-cylinder position="0 5 0" radius="13" height="0.1" segments-radial="8" color="#0f172a" material="src: #tex-dc-ceiling; repeat: 6 6; roughness: 0.9"></a-cylinder>
 
-            <a-box class="solid" position="0 2.5 -12.5" width="26" height="5" depth="1" visible="false"></a-box> {/* Utara */}
-            <a-box class="solid" position="0 2.5 12.5" width="26" height="5" depth="1" visible="false"></a-box>  {/* Selatan */}
-            <a-box class="solid" position="-12.5 2.5 0" width="1" height="5" depth="26" visible="false"></a-box> {/* Barat */}
-            <a-box class="solid" position="12.5 2.5 0" width="1" height="5" depth="26" visible="false"></a-box>  {/* Timur */}
+            <a-box class="solid" position="0 2.5 -12" width="19" height="5" depth="1" visible="false"></a-box>
 
+            {/* Selatan (Tepat di belakang Papan Instruksi yang ada di Z: 5) */}
+            <a-box class="solid" position="0 2.5 7" width="19" height="5" depth="1" visible="false"></a-box>
+
+            {/* Barat (Membungkus area kiri bilik yang ada di X: -4.5) */}
+            <a-box class="solid" position="-9 2.5 -2.5" width="1" height="5" depth="20" visible="false"></a-box>
+
+            {/* Timur (Membungkus area kanan bilik yang ada di X: 4.5) */}
+            <a-box class="solid" position="9 2.5 -2.5" width="1" height="5" depth="20" visible="false"></a-box>
 
             {/* ==========================================================
                 1. TITIK AWAL: POPUP INSTRUKSI (Di Selatan Lorong)
