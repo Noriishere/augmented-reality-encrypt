@@ -184,7 +184,6 @@ if (typeof AFRAME !== 'undefined' && !AFRAME.components['free-move']) {
     schema: {
       speed: { default: 0.1 },
       enabled: { default: true },
-      boundaryRadius: { default: 0 } // 0 = nonaktif
     },
     init: function () {
       this.keys = {};
