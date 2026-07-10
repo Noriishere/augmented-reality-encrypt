@@ -179,16 +179,6 @@ export default function HUD({
 
             {/* Footer */}
             <div className="absolute bottom-0 left-0 right-0 p-4 md:p-6">
-                <div className="flex justify-center">
-                    <button onClick={onToggleKeyboard}
-                        className={`pointer-events-auto px-8 py-3 font-mono text-sm tracking-[0.3em] transition-all duration-300 border ${
-                            isKeyboardOpen
-                                ? 'bg-red-950/80 border-red-500/60 text-red-400 hover:bg-red-900/60'
-                                : 'bg-black/60 border-cyan-500/50 text-cyan-400 hover:bg-cyan-950/40 hover:border-cyan-400'
-                        }`}>
-                        {isKeyboardOpen ? '[ TUTUP TERMINAL ]' : '[ AKSES TERMINAL ]'}
-                    </button>
-                </div>
                 <div className="flex justify-between items-center mt-4 opacity-50">
                     <div className="text-[8px] font-mono text-cyan-600">ENCRYPTION: AES-256-GCM | PROTOCOL: TLS 1.3</div>
                     <div className="text-[8px] font-mono text-cyan-600">SESSION: {sessionStr}</div>
