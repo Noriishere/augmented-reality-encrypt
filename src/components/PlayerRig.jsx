@@ -183,7 +183,8 @@ if (typeof AFRAME !== 'undefined' && !AFRAME.components['free-move']) {
   AFRAME.registerComponent('free-move', {
     schema: {
       speed: { default: 0.1 },
-      enabled: { default: true }
+      enabled: { default: true },
+      boundaryRadius: { default: 0 } // 0 = nonaktif
     },
     init: function () {
       this.keys = {};
@@ -283,7 +284,19 @@ if (typeof AFRAME !== 'undefined' && !AFRAME.components['free-move']) {
 
       if (collideX) this.velocity.x = 0;
       if (collideZ) this.velocity.z = 0;
-      // =======================================================
+      const maxR = this.data.boundaryRadius;
+      if (maxR > 0) {
+        const nextX = pos.x + this.velocity.x;
+        const nextZ = pos.z + this.velocity.z;
+        const dist = Math.sqrt(nextX * nextX + nextZ * nextZ);
+        if (dist > maxR) {
+          const angle = Math.atan2(nextZ, nextX);
+          const clampedX = Math.cos(angle) * maxR;
+          const clampedZ = Math.sin(angle) * maxR;
+          this.velocity.x = clampedX - pos.x;
+          this.velocity.z = clampedZ - pos.z;
+        }
+      }
 
       pos.x += this.velocity.x;
       pos.z += this.velocity.z;

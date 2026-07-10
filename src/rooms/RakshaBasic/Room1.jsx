@@ -121,23 +121,23 @@ function AudioTerminal({ position, rotation = "0 0 0" }) {
 /* ============================================================
    OCTAGON WALLS
    ============================================================ */
-function OctagonWalls() {
-    const RADIUS = 14;
-    const walls = Array.from({ length: 8 }, (_, i) => {
-        const angleDeg = i * 45;
-        const angleRad = (angleDeg * Math.PI) / 180;
-        return { x: RADIUS * Math.sin(angleRad), z: RADIUS * Math.cos(angleRad), rotY: angleDeg };
-    });
-    return (
-        <>
-            {walls.map((wall, i) => (
-                <a-box key={`oct-${i}`} class="solid"
-                    position={`${wall.x} 2.5 ${wall.z}`} rotation={`0 ${wall.rotY} 0`}
-                    width={RADIUS * 1.1} height="5" depth="0.5" visible="false"></a-box>
-            ))}
-        </>
-    );
-}
+// function OctagonWalls() {
+//     const RADIUS = 14;
+//     const walls = Array.from({ length: 8 }, (_, i) => {
+//         const angleDeg = i * 45;
+//         const angleRad = (angleDeg * Math.PI) / 180;
+//         return { x: RADIUS * Math.sin(angleRad), z: RADIUS * Math.cos(angleRad), rotY: angleDeg };
+//     });
+//     return (
+//         <>
+//             {walls.map((wall, i) => (
+//                 <a-box key={`oct-${i}`} class="solid"
+//                     position={`${wall.x} 2.5 ${wall.z}`} rotation={`0 ${wall.rotY} 0`}
+//                     width={RADIUS * 1.1} height="5" depth="0.5" visible="false"></a-box>
+//             ))}
+//         </>
+//     );
+// }
 
 /* ============================================================
    MAIN: ROOM1
@@ -169,7 +169,7 @@ export default function Room1({ onInteractTerminal }) {
                 material="src: #tex-office-ceiling; repeat: 7 7; roughness: 0.9"></a-cylinder>
             <a-cylinder position="0 2.5 0" radius="14" height="5" segments-radial="8"
                 side="back" open-ended="true" material="src: #tex-office-wall-outer-hd; repeat: 8 2; roughness: 0.8"></a-cylinder>
-            <OctagonWalls />
+            {/* <OctagonWalls /> */}
 
             {/* === POPUP === */}
             {showPopup && (
