@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 /* ============================================================
    KOMPONEN 1: RUANGAN BILIK (Kiri & Kanan)
@@ -82,6 +82,14 @@ function AudioTerminal({ position, rotation = "0 0 0" }) {
    ============================================================ */
 export default function Room1({ onInteractTerminal }) {
     const [showPopup, setShowPopup] = useState(true);
+
+    useEffect(() => {
+        // kasih waktu 1 frame biar DOM bener-bener ke-attach dulu
+        const raf = requestAnimationFrame(() => {
+            document.querySelector('a-scene')?.emit('refresh-solids');
+        });
+        return () => cancelAnimationFrame(raf);
+    }, []);
 
     return (
         <a-entity id="raksha-basic-room-1">

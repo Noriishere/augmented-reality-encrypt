@@ -209,7 +209,10 @@ if (typeof AFRAME !== 'undefined' && !AFRAME.components['free-move']) {
       this.rig = document.getElementById('rig') || this.el;
 
       this.el.sceneEl.addEventListener('loaded', () => this.refreshSolids());
-      this.el.sceneEl.addEventListener('refresh-solids', () => this.refreshSolids()); // <-- tambahin ini
+      this.el.sceneEl.addEventListener('refresh-solids', () => {
+        this.refreshSolids();
+        console.log('[free-move] refreshed! total solid:', this.solidCache.length);
+      });
       if (this.el.sceneEl.hasLoaded) this.refreshSolids();
     },
     refreshSolids: function () {
