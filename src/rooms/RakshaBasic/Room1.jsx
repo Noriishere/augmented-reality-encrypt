@@ -123,7 +123,7 @@ function AudioTerminal({ position, rotation = "0 0 0" }) {
    ============================================================ */
 function OctagonWalls() {
     const RADIUS = 14;
-    const SIDE = 2.5 * RADIUS * Math.sin(Math.PI / 8); // panjang sisi octagon
+    const SIDE = 3 * RADIUS * Math.sin(Math.PI / 8); // panjang sisi octagon
 
     const walls = Array.from({ length: 8 }, (_, i) => {
         const angleDeg = i * 45;
