@@ -123,33 +123,34 @@ function AudioTerminal({ position, rotation = "0 0 0" }) {
    ============================================================ */
 function OctagonWalls() {
     const RADIUS = 14;
-    const SIDE = 2 * RADIUS * Math.sin(Math.PI / 8); // panjang sisi octagon
+    const SIDE = 2 * RADIUS * Math.sin(Math.PI / 8);
 
-    const walls = Array.from({ length: 8 }, (_, i) => {
-        const angleDeg = i * 45;
-        const angleRad = angleDeg * Math.PI / 180;
-
-        return {
-            x: RADIUS * Math.sin(angleRad),
-            z: RADIUS * Math.cos(angleRad),
-            rotY: angleDeg
-        };
-    });
+    // radius ke tengah sisi (apothem)
+    const APOTHEM = RADIUS * Math.cos(Math.PI / 8);
 
     return (
         <>
-            {walls.map((wall, i) => (
-                <a-box
-                    key={`oct-${i}`}
-                    class="solid"
-                    position={`${wall.x} 2.5 ${wall.z}`}
-                    rotation={`0 ${wall.rotY} 0`}
-                    width={SIDE}
-                    height="5"
-                    depth="0.5"
-                    visible="false"
-                />
-            ))}
+            {Array.from({ length: 8 }, (_, i) => {
+                // tengah setiap sisi = offset 22.5°
+                const angle = ((i * 45) + 22.5) * Math.PI / 180;
+
+                return (
+                    <a-box
+                        key={i}
+                        class="solid"
+                        position={`
+                            ${APOTHEM * Math.sin(angle)}
+                            2.5
+                            ${APOTHEM * Math.cos(angle)}
+                        `}
+                        rotation={`0 ${i * 45 + 22.5} 0`}
+                        width={SIDE}
+                        height="5"
+                        depth="0.35"
+                        visible="false"
+                    />
+                );
+            })}
         </>
     );
 }
