@@ -267,7 +267,20 @@ function App() {
     setTimeout(() => {
       setCurrentRoom(roomName);
 
-      // 3. Tunggu sebentar agar ruangan baru ke-render, lalu buka lingkaran hitamnya
+      // --- 3. LOGIKA RESET POSISI (TELEPORTASI) ---
+      const playerRig = document.getElementById('rig');
+      if (playerRig) {
+        if (roomName === 'Raksha Basic') {
+          // Pindahkan pemain ke titik awal Room 1 (Selatan, dekat papan instruksi)
+          playerRig.setAttribute('position', '0 0 4.5');
+        } else if (roomName === 'LOBBY') {
+          // Pindahkan pemain kembali ke tengah jika kembali ke Lobi
+          playerRig.setAttribute('position', '0 0 0');
+        }
+      }
+      // --------------------------------------------
+
+      // 4. Tunggu sebentar agar ruangan baru ke-render, lalu buka lingkaran hitamnya
       setTimeout(() => {
         setIsTransitioning(false);
       }, 100);
@@ -345,7 +358,7 @@ function App() {
         {currentRoom === 'Raksha Basic' && (
           <RakshaBasicRoom1 onInteractTerminal={handleVRTerminalClick} />
         )}
-        
+
         {currentRoom !== 'LOBBY' && (
           <a-sky color="#0a0e14"></a-sky>
         )}
