@@ -409,13 +409,14 @@ function App() {
 
         {showKeyboard && (
           <VirtualKeyboard
-            position="0 1 -2"
-            rotation="-15 0 0"
+            // Posisi Z diatur ke -11 agar pas melayang di depan pemain saat menekan terminal Gerbang Keluar Room 1
+            position={currentRoom === 'Raksha Basic' ? "0 1.4 -10.8" : "0 1.5 -2"}
+            rotation="-10 0 0"
             currentInput={pin}
             onKeyPress={handleVirtualKeyPress}
+            onClose={() => setShowKeyboard(false)}
           />
         )}
-
         <PlayerRig
           isKeyboardOpen={showKeyboard}
           onToggleKeyboard={() => setShowKeyboard(!showKeyboard)}
