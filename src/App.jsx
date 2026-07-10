@@ -269,16 +269,36 @@ function App() {
 
       // --- 3. LOGIKA RESET POSISI (TELEPORTASI) ---
       const playerRig = document.getElementById('rig');
+      const camera = playerRig?.querySelector("a-camera");
       if (playerRig) {
         if (roomName === 'Raksha Basic') {
-          // Pindahkan pemain ke titik awal Room 1 (Selatan, dekat pintu masuk)
-          playerRig.setAttribute('position', '0 0 10');
+          playerRig.object3D.position.set(0, 0, 11);
+
+          if (camera) {
+            const look = camera.components["look-controls"];
+
+            camera.object3D.rotation.set(0, 0, 0);
+
+            if (look) {
+              look.yawObject.rotation.y = 0;
+              look.pitchObject.rotation.x = 0;
+            }
+          }
           // Reset arah pandang ke utara (menghadap tengah ruangan)
           playerRig.object3D.rotation.set(0, 0, 0);
         } else if (roomName === 'LOBBY') {
-          // Pindahkan pemain kembali ke tengah jika kembali ke Lobi
-          playerRig.setAttribute('position', '0 0 0');
-          playerRig.object3D.rotation.set(0, 0, 0);
+          playerRig.object3D.position.set(0, 0, 0);
+
+          if (camera) {
+            const look = camera.components["look-controls"];
+
+            camera.object3D.rotation.set(0, 0, 0);
+
+            if (look) {
+              look.yawObject.rotation.y = 0;
+              look.pitchObject.rotation.x = 0;
+            }
+          }
         }
       }
       // --------------------------------------------

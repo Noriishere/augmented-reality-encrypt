@@ -175,9 +175,30 @@
 //     </a-entity>
 //   );
 // }
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from "react";
 import VirtualKeyboard from './VirtualKeyboard'; // 1. Import VirtualKeyboard
 
+if (typeof AFRAME !== 'undefined' && !AFRAME.components['wire-box']) {
+  AFRAME.registerComponent('wire-box', {
+    schema: {
+      width: { default: 1 },
+      height: { default: 1 },
+      depth: { default: 1 },
+      color: { default: '#ff0000' }
+    },
+    init: function () {
+      const { width, height, depth, color } = this.data;
+      const geometry = new THREE.BoxGeometry(width, height, depth);
+      const edges = new THREE.EdgesGeometry(geometry);
+      const material = new THREE.LineBasicMaterial({ color });
+      const lineSegments = new THREE.LineSegments(edges, material);
+      this.el.setObject3D('mesh', lineSegments);
+    },
+    remove: function () {
+      this.el.removeObject3D('mesh');
+    }
+  });
+}
 // Free movement dengan collision detection yang lebih robust
 if (typeof AFRAME !== 'undefined' && !AFRAME.components['free-move']) {
   AFRAME.registerComponent('free-move', {
@@ -250,35 +271,47 @@ if (typeof AFRAME !== 'undefined' && !AFRAME.components['free-move']) {
       this.velocity.z += (moveZ - this.velocity.z) * 0.3;
 
       // =======================================================
-      // SISTEM TABRAKAN
+      // SISTEM TABRAKAN — sphere vs OBB (bukan world AABB)
       // =======================================================
       const pos = this.rig.object3D.position;
       this.rig.object3D.updateMatrixWorld(true);
 
-      const PADDING = 0.05;
-      const playerBoxX = new THREE.Box3().setFromCenterAndSize(
-        new THREE.Vector3(pos.x + this.velocity.x, 1, pos.z),
-        new THREE.Vector3(0.5 + PADDING, 2, 0.5 + PADDING)
-      );
-      const playerBoxZ = new THREE.Box3().setFromCenterAndSize(
-        new THREE.Vector3(pos.x, 1, pos.z + this.velocity.z),
-        new THREE.Vector3(0.5 + PADDING, 2, 0.5 + PADDING)
-      );
+      const PLAYER_RADIUS = 0.35; // kira-kira setara 0.5+padding sebelumnya
+
+      // helper: cek apakah titik (world space) nabrak box lokal el
+      const hitsWall = (el, worldX, worldY, worldZ) => {
+        if (!el.object3D) return false;
+        el.object3D.updateMatrixWorld(true);
+
+        const mesh = el.getObject3D('mesh');
+        if (!mesh || !mesh.geometry || !mesh.geometry.parameters) return false;
+        const { width = 1, height = 1, depth = 1 } = mesh.geometry.parameters;
+        const halfX = width / 2, halfY = height / 2, halfZ = depth / 2;
+
+        // invers matrix world -> transform titik dunia ke ruang lokal wall
+        const invMatrix = new THREE.Matrix4().copy(el.object3D.matrixWorld).invert();
+        const localPoint = new THREE.Vector3(worldX, worldY, worldZ).applyMatrix4(invMatrix);
+
+        // clamp titik lokal ke dalam box (closest point on box)
+        const clampedX = Math.max(-halfX, Math.min(halfX, localPoint.x));
+        const clampedY = Math.max(-halfY, Math.min(halfY, localPoint.y));
+        const clampedZ = Math.max(-halfZ, Math.min(halfZ, localPoint.z));
+
+        const dx = localPoint.x - clampedX;
+        const dy = localPoint.y - clampedY;
+        const dz = localPoint.z - clampedZ;
+        const distSq = dx * dx + dy * dy + dz * dz;
+
+        return distSq < PLAYER_RADIUS * PLAYER_RADIUS;
+      };
 
       let collideX = false;
       let collideZ = false;
 
       for (let i = 0; i < this.solidCache.length; i++) {
         const el = this.solidCache[i];
-        if (!el.object3D) continue;
-
-        el.object3D.updateMatrixWorld(true);
-        const solidBox = new THREE.Box3().setFromObject(el.object3D);
-
-        if (solidBox.isEmpty()) continue;
-
-        if (playerBoxX.intersectsBox(solidBox)) collideX = true;
-        if (playerBoxZ.intersectsBox(solidBox)) collideZ = true;
+        if (hitsWall(el, pos.x + this.velocity.x, 1, pos.z)) collideX = true;
+        if (hitsWall(el, pos.x, 1, pos.z + this.velocity.z)) collideZ = true;
       }
 
       if (collideX) this.velocity.x = 0;
@@ -290,6 +323,11 @@ if (typeof AFRAME !== 'undefined' && !AFRAME.components['free-move']) {
 
       if (mx === 0 && Math.abs(this.axisX) < 0.01) this.velocity.x *= 0.85;
       if (mz === 0 && Math.abs(this.axisZ) < 0.01) this.velocity.z *= 0.85;
+
+      const text = document.getElementById("debug-text");
+      if (text) {
+        text.setAttribute("value", `XYZ ${pos.x.toFixed(2)} 0 ${pos.z.toFixed(2)}`);
+      }
     }
   });
 }
@@ -307,7 +345,34 @@ export default function PlayerRig({
 }) {
   const hudRef = useRef(null);
   const terminalRef = useRef(null);
+  useEffect(() => {
+    let id;
 
+    const update = () => {
+      const rig = document.getElementById("rig");
+
+      if (rig) {
+        const p = rig.object3D.position;
+        const r = rig.object3D.rotation;
+
+        const text = document.getElementById("debug-text");
+
+        if (text) {
+          text.setAttribute(
+            "value",
+            `XYZ : ${p.x.toFixed(2)} ${p.y.toFixed(2)} ${p.z.toFixed(2)}
+YAW : ${THREE.MathUtils.radToDeg(r.y).toFixed(1)}`
+          );
+        }
+      }
+
+      id = requestAnimationFrame(update);
+    };
+
+    update();
+
+    return () => cancelAnimationFrame(id);
+  }, []);
   useEffect(() => {
     if (hudRef.current && vrHudTexture) {
       const mesh = hudRef.current.getObject3D('mesh');
@@ -335,7 +400,13 @@ export default function PlayerRig({
           animation__click="property: scale; startEvents: click; from: 0.2 0.2 0.2; to: 1 1 1"
           animation__mouseenter="property: scale; startEvents: mouseenter; to: 1.5 1.5 1.5"
           animation__mouseleave="property: scale; startEvents: mouseleave; to: 1 1 1"></a-cursor>
-
+        <a-text
+          id="debug-text"
+          position="-0.8 0.45 -1"
+          color="#00ff00"
+          width="2.5"
+          value=""
+        ></a-text>
         <a-circle
           position="0 0 -0.05"
           color="#000000"
