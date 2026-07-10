@@ -271,11 +271,14 @@ function App() {
       const playerRig = document.getElementById('rig');
       if (playerRig) {
         if (roomName === 'Raksha Basic') {
-          // Pindahkan pemain ke titik awal Room 1 (Selatan, dekat papan instruksi)
-          playerRig.setAttribute('position', '0 0 4.5');
+          // Pindahkan pemain ke titik awal Room 1 (Selatan, dekat pintu masuk)
+          playerRig.setAttribute('position', '0 0 10');
+          // Reset arah pandang ke utara (menghadap tengah ruangan)
+          playerRig.object3D.rotation.set(0, 0, 0);
         } else if (roomName === 'LOBBY') {
           // Pindahkan pemain kembali ke tengah jika kembali ke Lobi
           playerRig.setAttribute('position', '0 0 0');
+          playerRig.object3D.rotation.set(0, 0, 0);
         }
       }
       // --------------------------------------------
@@ -350,6 +353,26 @@ function App() {
           <img id="tex-dc-server" src="/assets/dc_server_panel_hd.png" crossOrigin="anonymous" />
           <img id="tex-dc-keypad" src="/assets/dc_keypad_panel_hd.png" crossOrigin="anonymous" />
           <img id="tex-dc-hvac" src="/assets/dc_hvac.png" crossOrigin="anonymous" />
+          <img id="tex-dc-monitor" src="/assets/dc_computer_monitor.png" crossOrigin="anonymous" />
+          <img id="tex-dc-desk" src="/assets/dc_desk.png" crossOrigin="anonymous" />
+          <img id="tex-dc-chair" src="/assets/dc_chair.png" crossOrigin="anonymous" />
+          <img id="tex-dc-keyboard" src="/assets/dc_keyboard.png" crossOrigin="anonymous" />
+          <img id="tex-dc-mouse" src="/assets/dc_mouse.png" crossOrigin="anonymous" />
+          <img id="tex-office-floor" src="/assets/office_floor.png" crossOrigin="anonymous" />
+          <img id="tex-office-wall" src="/assets/office_wall.png" crossOrigin="anonymous" />
+          <img id="tex-office-ceiling" src="/assets/office_ceiling.png" crossOrigin="anonymous" />
+          <img id="tex-office-door" src="/assets/office_door.png" crossOrigin="anonymous" />
+          <img id="tex-office-wall-v2" src="/assets/office_wall_v2.png" crossOrigin="anonymous" />
+          <img id="tex-office-door-v2" src="/assets/office_door_v2.png" crossOrigin="anonymous" />
+          <img id="tex-office-roller" src="/assets/office_roller_door.png" crossOrigin="anonymous" />
+          <img id="tex-office-wall-outer" src="/assets/office_wall_outer.png" crossOrigin="anonymous" />
+          <img id="tex-office-wall-inner" src="/assets/office_wall_inner.png" crossOrigin="anonymous" />
+          <img id="tex-office-wall-outer-hd" src="/assets/office_wall_outer_hd.png" crossOrigin="anonymous" />
+          <img id="tex-office-wall-inner-hd" src="/assets/office_wall_inner_hd.png" crossOrigin="anonymous" />
+          <img id="tex-monitor-v" src="/assets/monitor_cipher_V.png" crossOrigin="anonymous" />
+          <img id="tex-monitor-b" src="/assets/monitor_cipher_B.png" crossOrigin="anonymous" />
+          <img id="tex-monitor-d" src="/assets/monitor_cipher_D.png" crossOrigin="anonymous" />
+          <img id="tex-monitor-p" src="/assets/monitor_cipher_P.png" crossOrigin="anonymous" />
         </a-assets>
 
         {currentRoom === 'LOBBY' && (
