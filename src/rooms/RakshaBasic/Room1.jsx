@@ -101,7 +101,7 @@ export default function Room1({ onInteractTerminal }) {
             <a-light type="point" color="#22c55e" intensity="0.7" position="0 3 -10" distance="10" decay="2"></a-light>
 
             {/* --- ARSITEKTUR OKTAGON (Dinding Terluar) --- */}
-            <a-cylinder position="0 0 0" radius="13" height="0.1" segments-radial="8" color="#020617" material="src: #tex-dc-floor; repeat: 8 8; roughness: 0.6; metalness: 0.2"></a-cylinder>
+            <a-cylinder class="solid" position="0 0 0" radius="13" height="0.1" segments-radial="8" color="#020617" material="src: #tex-dc-floor; repeat: 8 8; roughness: 0.6; metalness: 0.2"></a-cylinder>
             
             <a-cylinder position="0 2.5 0" radius="13" height="5" segments-radial="8" side="back" open-ended="true" color="#1e293b" material="src: #tex-dc-wall; repeat: 10 2; roughness: 0.8"></a-cylinder>
             
