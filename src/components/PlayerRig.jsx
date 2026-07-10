@@ -190,7 +190,7 @@ if (typeof AFRAME !== 'undefined' && !AFRAME.components['free-move']) {
       this.velocity = { x: 0, z: 0 };
       this.axisX = 0;
       this.axisZ = 0;
-      this.solidCache = []; 
+      this.solidCache = [];
       this.frameCount = 0;
 
       this.onKeyDown = (e) => { this.keys[e.code] = true; };
@@ -209,18 +209,12 @@ if (typeof AFRAME !== 'undefined' && !AFRAME.components['free-move']) {
       this.rig = document.getElementById('rig') || this.el;
 
       this.el.sceneEl.addEventListener('loaded', () => this.refreshSolids());
+      this.el.sceneEl.addEventListener('refresh-solids', () => this.refreshSolids()); // <-- tambahin ini
       if (this.el.sceneEl.hasLoaded) this.refreshSolids();
     },
     refreshSolids: function () {
       const nodes = document.querySelectorAll('.solid');
-      console.log('[free-move] solid elements found:', nodes.length);
-      this.solidCache = Array.from(nodes).filter(el => {
-        if (!el.object3D) {
-          console.warn('[free-move] elemen solid tanpa object3D:', el);
-          return false;
-        }
-        return true;
-      });
+      this.solidCache = Array.from(nodes).filter(el => el.object3D && el.isConnected);
     },
     remove: function () {
       window.removeEventListener('keydown', this.onKeyDown);
@@ -258,7 +252,7 @@ if (typeof AFRAME !== 'undefined' && !AFRAME.components['free-move']) {
       const pos = this.rig.object3D.position;
       this.rig.object3D.updateMatrixWorld(true);
 
-      const PADDING = 0.05; 
+      const PADDING = 0.05;
       const playerBoxX = new THREE.Box3().setFromCenterAndSize(
         new THREE.Vector3(pos.x + this.velocity.x, 1, pos.z),
         new THREE.Vector3(0.5 + PADDING, 2, 0.5 + PADDING)
@@ -298,11 +292,11 @@ if (typeof AFRAME !== 'undefined' && !AFRAME.components['free-move']) {
 }
 
 // 2. Tambahkan currentInput dan handleVirtualKeyPress di parameter
-export default function PlayerRig({ 
-  isKeyboardOpen, 
-  onToggleKeyboard, 
-  isVRMode, 
-  vrHudTexture, 
+export default function PlayerRig({
+  isKeyboardOpen,
+  onToggleKeyboard,
+  isVRMode,
+  vrHudTexture,
   onVRTerminalClick,
   currentInput,
   handleVirtualKeyPress,
@@ -333,29 +327,29 @@ export default function PlayerRig({
         wasd-controls="enabled: false"
         look-controls="pointerLockEnabled: false; touchEnabled: true"
         free-move={`speed: 0.1; enabled: ${!isKeyboardOpen}`}>
-        
+
         <a-cursor raycaster="objects: .clickable; far: 100" color="#22d3ee"
           animation__click="property: scale; startEvents: click; from: 0.2 0.2 0.2; to: 1 1 1"
           animation__mouseenter="property: scale; startEvents: mouseenter; to: 1.5 1.5 1.5"
           animation__mouseleave="property: scale; startEvents: mouseleave; to: 1 1 1"></a-cursor>
-        
+
         <a-circle
-            position="0 0 -0.05"
-            color="#000000"
-            material="shader: flat; transparent: true; opacity: 1; side: double"
-            scale={isTransitioning ? "2 2 2" : "0 0 0"}
-            animation="property: scale; dur: 800; easing: easeInOutSine"
+          position="0 0 -0.05"
+          color="#000000"
+          material="shader: flat; transparent: true; opacity: 1; side: double"
+          scale={isTransitioning ? "2 2 2" : "0 0 0"}
+          animation="property: scale; dur: 800; easing: easeInOutSine"
         ></a-circle>
 
         {/* 3. KEYBOARD VIRTUAL DITEMPATKAN DI DALAM CAMERA */}
         {isKeyboardOpen && (
-           <VirtualKeyboard 
-             position="0 -0.3 -1.2"
-             rotation="-10 0 0"
-             currentInput={currentInput}
-             onKeyPress={handleVirtualKeyPress}
-             onClose={onToggleKeyboard}
-           />
+          <VirtualKeyboard
+            position="0 -0.3 -1.2"
+            rotation="-10 0 0"
+            currentInput={currentInput}
+            onKeyPress={handleVirtualKeyPress}
+            onClose={onToggleKeyboard}
+          />
         )}
 
         {isVRMode && (

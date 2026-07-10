@@ -283,6 +283,7 @@ function App() {
       // 4. Tunggu sebentar agar ruangan baru ke-render, lalu buka lingkaran hitamnya
       setTimeout(() => {
         setIsTransitioning(false);
+        sceneRef.current?.emit('refresh-solids'); // <-- tambahin ini
       }, 100);
     }, 800);
   };
