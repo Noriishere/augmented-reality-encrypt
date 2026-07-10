@@ -75,11 +75,10 @@ function AudioTerminal({ position, rotation = "0 0 0" }) {
    KOMPONEN 3: DINDING OKTAGON (Collider Invisible)
    ============================================================ */
 function OctagonWalls() {
-    const APOTHEM = 12.02;
-    const SIDE_LENGTH = 9.95;
+    const APOTHEM = 11.9;       // digeser sedikit ke dalam (dari 12.02)
+    const SIDE_LENGTH = 10.6;   // dilebihin dari 9.95, biar overlap di sudut
 
     const walls = Array.from({ length: 8 }, (_, i) => {
-        // Face (sisi datar) ada di tengah antar-vertex, makanya + 22.5
         const angleDeg = i * 45 + 22.5;
         const angleRad = (angleDeg * Math.PI) / 180;
         return {
@@ -99,7 +98,7 @@ function OctagonWalls() {
                     rotation={`0 ${wall.rotY} 0`}
                     width={SIDE_LENGTH}
                     height="5"
-                    depth="0.3"
+                    depth="0.5"
                     visible="false"
                 ></a-box>
             ))}
