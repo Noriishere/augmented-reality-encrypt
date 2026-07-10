@@ -305,7 +305,8 @@ export default function PlayerRig({
   vrHudTexture, 
   onVRTerminalClick,
   currentInput,
-  handleVirtualKeyPress
+  handleVirtualKeyPress,
+  isTransitioning
 }) {
   const hudRef = useRef(null);
   const terminalRef = useRef(null);
@@ -338,6 +339,14 @@ export default function PlayerRig({
           animation__mouseenter="property: scale; startEvents: mouseenter; to: 1.5 1.5 1.5"
           animation__mouseleave="property: scale; startEvents: mouseleave; to: 1 1 1"></a-cursor>
         
+        <a-circle
+            position="0 0 -0.05"
+            color="#000000"
+            material="shader: flat; transparent: true; opacity: 1; side: double"
+            scale={isTransitioning ? "2 2 2" : "0 0 0"}
+            animation="property: scale; dur: 800; easing: easeInOutSine"
+        ></a-circle>
+
         {/* 3. KEYBOARD VIRTUAL DITEMPATKAN DI DALAM CAMERA */}
         {isKeyboardOpen && (
            <VirtualKeyboard 

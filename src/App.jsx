@@ -258,6 +258,21 @@ function App() {
 
   const sceneRef = useRef(null);
   const vrHudTexture = useCanvasHUD({ currentRoom, isVRMode });
+  const [isTransitioning, setIsTransitioning] = useState(false);
+
+  const handleSelectRoom = (roomName) => {
+    setIsTransitioning(true); // 1. Lingkaran hitam membesar menutupi layar
+
+    // 2. Tunggu 800ms sampai layar full hitam, lalu ganti ruangan
+    setTimeout(() => {
+      setCurrentRoom(roomName);
+
+      // 3. Tunggu sebentar agar ruangan baru ke-render, lalu buka lingkaran hitamnya
+      setTimeout(() => {
+        setIsTransitioning(false);
+      }, 100);
+    }, 800);
+  };
 
   useEffect(() => {
     const sceneEl = sceneRef.current;
@@ -324,12 +339,13 @@ function App() {
         </a-assets>
 
         {currentRoom === 'LOBBY' && (
-          <MainMenu onSelectRoom={(roomName) => setCurrentRoom(roomName)} />
+          <MainMenu onSelectRoom={handleSelectRoom} />
         )}
 
         {currentRoom === 'Raksha Basic' && (
           <RakshaBasicRoom1 onInteractTerminal={handleVRTerminalClick} />
         )}
+        
         {currentRoom !== 'LOBBY' && (
           <a-sky color="#0a0e14"></a-sky>
         )}
@@ -349,10 +365,11 @@ function App() {
           isVRMode={isVRMode}
           vrHudTexture={vrHudTexture}
           onVRTerminalClick={handleVRTerminalClick}
-
-          // Tambahkan 2 baris ini di App.jsx kamu:
           currentInput={pin}
           handleVirtualKeyPress={handleVirtualKeyPress}
+
+          // Tambahkan baris ini:
+          isTransitioning={isTransitioning}
         />
       </a-scene>
     </div>
