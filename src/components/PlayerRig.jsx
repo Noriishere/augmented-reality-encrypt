@@ -345,6 +345,7 @@ export default function PlayerRig({
 }) {
   const hudRef = useRef(null);
   const terminalRef = useRef(null);
+  const circleRef = useRef(null);
   useEffect(() => {
     let id;
 
@@ -373,6 +374,15 @@ YAW : ${THREE.MathUtils.radToDeg(r.y).toFixed(1)}`
 
     return () => cancelAnimationFrame(id);
   }, []);
+  useEffect(() => {
+    const circle = circleRef.current;
+    if (!circle) return;
+    if (isTransitioning) {
+      circle.emit('do-fade-out');
+    } else {
+      circle.emit('do-fade-in');
+    }
+  }, [isTransitioning]);
   useEffect(() => {
     if (hudRef.current && vrHudTexture) {
       const mesh = hudRef.current.getObject3D('mesh');
@@ -408,11 +418,14 @@ YAW : ${THREE.MathUtils.radToDeg(r.y).toFixed(1)}`
           value=""
         ></a-text>
         <a-circle
+          ref={circleRef}
           position="0 0 -0.05"
+          radius="1.5"
           color="#000000"
           material="shader: flat; transparent: true; opacity: 1; side: double"
-          scale={isTransitioning ? "2 2 2" : "0 0 0"}
-          animation="property: scale; dur: 800; easing: easeInOutSine"
+          scale="0 0 0"
+          animation__fadeout="property: scale; to: 2 2 2; dur: 780; easing: easeInOutSine; startEvents: do-fade-out"
+          animation__fadein="property: scale; to: 0 0 0; dur: 600; easing: easeInOutSine; startEvents: do-fade-in"
         ></a-circle>
 
         {/* 3. KEYBOARD VIRTUAL DITEMPATKAN DI DALAM CAMERA */}
