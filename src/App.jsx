@@ -4,7 +4,7 @@ import VirtualKeyboard from './components/VirtualKeyboard';
 import PlayerRig from './components/PlayerRig';
 import MainMenu from './rooms/MainMenu';
 import RakshaBasicRoom1 from './rooms/RakshaBasic/Room1';
-
+import RakshaBasicCorridor from './rooms/RakshaBasic/Corridor';
 /* ============================================================
    Canvas HUD — close to player, glitch working, clickable
    ============================================================ */
@@ -272,6 +272,7 @@ function App() {
       const camera = playerRig?.querySelector("a-camera");
       if (playerRig) {
         if (roomName === 'Raksha Basic') {
+          setRoomStage('room1');
           playerRig.object3D.position.set(0, 0, 11);
 
           if (camera) {
@@ -338,10 +339,58 @@ function App() {
     }
   };
 
+  const [roomStage, setRoomStage] = useState('room1');
+  const [keyboardContext, setKeyboardContext] = useState(null);
+
+  const ROOM_ANSWERS = {
+    'room1-exit': 'OUWI',
+  };
+
   const handleVirtualKeyPress = (key) => {
-    if (key === 'CLR') setPin('');
-    else if (key === 'ENT') { alert(`PIN: ${pin}`); setPin(''); }
-    else if (pin.length < 4) setPin(prev => prev + key);
+    if (key === 'CLR') {
+      setPin('');
+      return;
+    }
+    if (key === 'ENT') {
+      const answer = ROOM_ANSWERS[keyboardContext];
+      if (answer && pin.toUpperCase() === answer) {
+        setShowKeyboard(false);
+        setPin('');
+        goToCorridor();
+      } else {
+        alert('PIN salah! Coba lagi.');
+        setPin('');
+      }
+      return;
+    }
+    if (pin.length < 4) setPin(prev => prev + key);
+  };
+
+  const goToCorridor = () => {
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setRoomStage('corridor');
+
+      const playerRig = document.getElementById('rig');
+      if (playerRig) {
+        playerRig.object3D.position.set(0, 0, -14);
+        playerRig.object3D.rotation.set(0, 0, 0);
+        const camera = playerRig.querySelector("a-camera");
+        if (camera) {
+          camera.object3D.rotation.set(0, 0, 0);
+          const look = camera.components["look-controls"];
+          if (look) {
+            look.yawObject.rotation.y = 0;
+            look.pitchObject.rotation.x = 0;
+          }
+        }
+      }
+
+      setTimeout(() => {
+        setIsTransitioning(false);
+        sceneRef.current?.emit('refresh-solids');
+      }, 100);
+    }, 800);
   };
 
   const handleVRTerminalClick = useCallback(() => {
@@ -399,8 +448,17 @@ function App() {
           <MainMenu onSelectRoom={handleSelectRoom} />
         )}
 
-        {currentRoom === 'Raksha Basic' && (
-          <RakshaBasicRoom1 onInteractTerminal={handleVRTerminalClick} />
+        {currentRoom === 'Raksha Basic' && roomStage === 'room1' && (
+          <RakshaBasicRoom1
+            onInteractTerminal={() => {
+              setKeyboardContext('room1-exit');
+              handleVRTerminalClick();
+            }}
+          />
+        )}
+
+        {currentRoom === 'Raksha Basic' && roomStage === 'corridor' && (
+          <RakshaBasicCorridor />
         )}
 
         {currentRoom !== 'LOBBY' && (

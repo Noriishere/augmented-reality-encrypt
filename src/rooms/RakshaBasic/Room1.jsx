@@ -95,7 +95,7 @@ function AudioTerminal({ position, rotation = "0 0 0" }) {
     const [isPlaying, setIsPlaying] = useState(false);
     return (
         <a-entity position={position} rotation={rotation}>
-            <a-cylinder class="solid" position="0 0.6 0" radius="0.3" height="1.2" color="#1e293b" material="roughness: 0.8; metalness: 0.5"></a-cylinder>
+            <a-cylinder class="solid" position="0 0.5 0" radius="0.18" height="1.2" color="#1e293b" material="roughness: 0.8; metalness: 0.5"></a-cylinder>
             <a-box position="0 1.4 0" rotation="-15 0 0" width="1.1" height="0.75" depth="0.12" color="#0f172a"></a-box>
             <a-plane position="0 1.4 0.07" rotation="-15 0 0" width="1" height="0.65" color="#020617"></a-plane>
             <a-text value="[ AUDIO LOG ]" position="0 1.6 0.09" rotation="-15 0 0" align="center" color="#38bdf8" scale="0.32 0.32 0.32"></a-text>
@@ -137,34 +137,34 @@ function OctagonWalls() {
         };
     });
 
-return (
-    <>
-        {walls.map((wall, i) => (
-            <React.Fragment key={`oct-${i}`}>
-                {/* Collider */}
-                <a-box
-                    class="solid"
-                    position={`${wall.x} 2.5 ${wall.z}`}
-                    rotation={`0 ${wall.rotY} 0`}
-                    width={SIDE - 0.15}
-                    height="5"
-                    depth="0.1"
-                    visible="false"
-                />
+    return (
+        <>
+            {walls.map((wall, i) => (
+                <React.Fragment key={`oct-${i}`}>
+                    {/* Collider */}
+                    <a-box
+                        class="solid"
+                        position={`${wall.x} 2.5 ${wall.z}`}
+                        rotation={`0 ${wall.rotY} 0`}
+                        width={SIDE - 0.15}
+                        height="5"
+                        depth="0.1"
+                        visible="false"
+                    />
 
-                {/* Debug */}
-                <a-box
-                    position={`${wall.x} 2.5 ${wall.z}`}
-                    rotation={`0 ${wall.rotY} 0`}
-                    width={SIDE - 0.15}
-                    height="5"
-                    depth="0.1"
-                    material="wireframe: true; color: red;"
-                />
-            </React.Fragment>
-        ))}
-    </>
-);
+                    {/* Debug */}
+                    <a-box
+                        position={`${wall.x} 2.5 ${wall.z}`}
+                        rotation={`0 ${wall.rotY} 0`}
+                        width={SIDE - 0.15}
+                        height="5"
+                        depth="0.1"
+                        material="wireframe: true; color: red;"
+                    />
+                </React.Fragment>
+            ))}
+        </>
+    );
 }
 
 /* ============================================================
@@ -237,11 +237,12 @@ export default function Room1({ onInteractTerminal }) {
                     material="emissive: #14532d; emissiveIntensity: 0.6"></a-box>
                 <a-text value="GERBANG KELUAR" position="0 3.6 0.25" align="center" color="#4ade80" scale="1 1 1" font="mozillavr"></a-text>
                 <a-text value="STATUS: TERKUNCI (Butuh Dekripsi)" position="0 3.3 0.25" align="center" color="#bbf7d0" scale="0.35 0.35 0.35"></a-text>
-                <a-cylinder class="solid" position="0 0.5 1.8" radius="0.35" height="1" color="#1e293b"></a-cylinder>
+                <a-cylinder class="solid" position="0 0.5 1.7" radius="0.18" height="1.2" color="#1e293b"></a-cylinder>
                 <a-entity position="0 1.2 1.8" rotation="-20 0 0">
                     <a-box width="1.5" height="0.9" depth="0.12" color="#020617"></a-box>
-                    <a-text value="SISTEM AUTENTIKASI" position="0 0.28 0.07" align="center" color="#38bdf8" scale="0.32 0.32 0.32"></a-text>
-                    <a-text value="Masukkan Plain Text" position="0 0.12 0.07" align="center" color="#94a3b8" scale="0.27 0.27 0.27"></a-text>
+                    <a-text value="SISTEM AUTENTIKASI" position="0 0.30 0.07" align="center" color="#38bdf8" scale="0.32 0.32 0.32"></a-text>
+                    <a-text value="Masukkan Plain Text" position="0 0.16 0.07" align="center" color="#94a3b8" scale="0.27 0.27 0.27"></a-text>
+                    <a-text value="Hint: Tujuh langkah ke masa lalu akan menuntunmu pada makna yang sebenarnya." position="0 0.04 0.07" align="center" color="#facc15" scale="0.18 0.18 0.18"></a-text>
                     <a-entity position="0 -0.18 0.07">
                         <a-box width="1.1" height="0.28" depth="0.06" color="#0284c7" className="clickable"
                             animation__hover="property: scale; to: 1.05 1.05 1.05; startEvents: mouseenter; dur: 200"
