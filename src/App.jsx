@@ -5,6 +5,8 @@ import PlayerRig from './components/PlayerRig';
 import MainMenu from './rooms/MainMenu';
 import RakshaBasicRoom1 from './rooms/RakshaBasic/Room1';
 import RakshaBasicCorridor from './rooms/RakshaBasic/Corridor';
+import RakshaBasicRoom2 from './rooms/RakshaBasic/Room2';
+
 /* ============================================================
    Canvas HUD — close to player, glitch working, clickable
    ============================================================ */
@@ -260,14 +262,19 @@ function App() {
   const vrHudTexture = useCanvasHUD({ currentRoom, isVRMode });
   const [isTransitioning, setIsTransitioning] = useState(false);
 
-  const handleSelectRoom = (roomName) => {
-    setIsTransitioning(true); // 1. Lingkaran hitam membesar menutupi layar
+  // MENGGUNAKAN SATU STATE UNTUK SEMUA KONFIGURASI KEYBOARD
+  const [keyboardConfig, setKeyboardConfig] = useState({
+    context: '',
+    position: '0 1.4 -10.8',
+    rotation: '-10 0 0'
+  });
 
-    // 2. Tunggu 800ms sampai layar full hitam, lalu ganti ruangan
+  const handleSelectRoom = (roomName) => {
+    setIsTransitioning(true);
+
     setTimeout(() => {
       setCurrentRoom(roomName);
 
-      // --- 3. LOGIKA RESET POSISI (TELEPORTASI) ---
       const playerRig = document.getElementById('rig');
       const camera = playerRig?.querySelector("a-camera");
       if (playerRig) {
@@ -277,24 +284,18 @@ function App() {
 
           if (camera) {
             const look = camera.components["look-controls"];
-
             camera.object3D.rotation.set(0, 0, 0);
-
             if (look) {
               look.yawObject.rotation.y = 0;
               look.pitchObject.rotation.x = 0;
             }
           }
-          // Reset arah pandang ke utara (menghadap tengah ruangan)
           playerRig.object3D.rotation.set(0, 0, 0);
         } else if (roomName === 'LOBBY') {
           playerRig.object3D.position.set(0, 0, 0);
-
           if (camera) {
             const look = camera.components["look-controls"];
-
             camera.object3D.rotation.set(0, 0, 0);
-
             if (look) {
               look.yawObject.rotation.y = 0;
               look.pitchObject.rotation.x = 0;
@@ -302,12 +303,10 @@ function App() {
           }
         }
       }
-      // --------------------------------------------
 
-      // 4. Tunggu sebentar agar ruangan baru ke-render, lalu buka lingkaran hitamnya
       setTimeout(() => {
         setIsTransitioning(false);
-        sceneRef.current?.emit('refresh-solids'); // <-- tambahin ini
+        sceneRef.current?.emit('refresh-solids');
       }, 100);
     }, 800);
   };
@@ -340,10 +339,11 @@ function App() {
   };
 
   const [roomStage, setRoomStage] = useState('room1');
-  const [keyboardContext, setKeyboardContext] = useState(null);
 
   const ROOM_ANSWERS = {
     'room1-exit': 'OUWI',
+    'room2-enter': 'OUWO',
+    'room2-self-exit': 'OUWI', // <-- Tambahkan baris ini
   };
 
   const handleVirtualKeyPress = (key) => {
@@ -352,18 +352,43 @@ function App() {
       return;
     }
     if (key === 'ENT') {
-      const answer = ROOM_ANSWERS[keyboardContext];
+      const answer = ROOM_ANSWERS[keyboardConfig.context];
       if (answer && pin.toUpperCase() === answer) {
         setShowKeyboard(false);
         setPin('');
-        goToCorridor();
+        
+        if (keyboardConfig.context === 'room1-exit') {
+          goToCorridor();
+        } else if (keyboardConfig.context === 'room2-enter') {
+          goToRoom2();
+        } else if (keyboardConfig.context === 'room2-self-exit') {
+          // <-- Tambahkan blok if ini
+          // Memancarkan sinyal ke Room 2 untuk memunculkan pop-up kemenangan rahasia
+          window.dispatchEvent(new CustomEvent('room2-self-exit-success'));
+        }
       } else {
         alert('PIN salah! Coba lagi.');
         setPin('');
       }
       return;
     }
-    if (pin.length < 4) setPin(prev => prev + key);
+    if (pin.length < 6) setPin(prev => prev + key);
+  };
+
+  const goToRoom2 = () => {
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setRoomStage('room2');
+      const playerRig = document.getElementById('rig');
+      if (playerRig) {
+        playerRig.object3D.position.set(0, 0, 0);
+        playerRig.object3D.rotation.set(0, 0, 0);
+      }
+      setTimeout(() => {
+        setIsTransitioning(false);
+        document.querySelector('a-scene')?.emit('refresh-solids');
+      }, 100);
+    }, 800);
   };
 
   const goToCorridor = () => {
@@ -395,6 +420,22 @@ function App() {
 
   const handleVRTerminalClick = useCallback(() => {
     setShowKeyboard(prev => !prev);
+  }, []);
+
+  // Event listener untuk open-keyboard kini menangkap data posisi dari custom event
+  useEffect(() => {
+    const handler = (e) => {
+      if (e.detail && e.detail.context) {
+        setKeyboardConfig({
+          context: e.detail.context,
+          position: e.detail.position || '0 1.4 -10.8', // Fallback default
+          rotation: e.detail.rotation || '-10 0 0'
+        });
+        setShowKeyboard(true);
+      }
+    };
+    window.addEventListener('open-keyboard', handler);
+    return () => window.removeEventListener('open-keyboard', handler);
   }, []);
 
   return (
@@ -438,10 +479,19 @@ function App() {
           <img id="tex-office-wall-inner" src="/assets/office_wall_inner.png" crossOrigin="anonymous" />
           <img id="tex-office-wall-outer-hd" src="/assets/office_wall_outer_hd.png" crossOrigin="anonymous" />
           <img id="tex-office-wall-inner-hd" src="/assets/office_wall_inner_hd.png" crossOrigin="anonymous" />
+          <img id="tex-locker-front" src="/assets/locker_front.png" crossOrigin="anonymous" />
+          <img id="tex-locker-open" src="/assets/locker_open.png" crossOrigin="anonymous" />
+          <img id="tex-paper-note" src="/assets/paper_note.png" crossOrigin="anonymous" />
           <img id="tex-monitor-v" src="/assets/monitor_cipher_V.png" crossOrigin="anonymous" />
           <img id="tex-monitor-b" src="/assets/monitor_cipher_B.png" crossOrigin="anonymous" />
           <img id="tex-monitor-d" src="/assets/monitor_cipher_D.png" crossOrigin="anonymous" />
           <img id="tex-monitor-p" src="/assets/monitor_cipher_P.png" crossOrigin="anonymous" />
+          <img id="npc-teman" src="/assets/npc_teman_online.png" crossOrigin="anonymous" />
+          <img id="npc-sahabat" src="/assets/npc_sahabat.png" crossOrigin="anonymous" />
+          <img id="npc-admin" src="/assets/npc_admin_palsu.png" crossOrigin="anonymous" />
+          <img id="npc-ortu" src="/assets/npc_orang_tua.png" crossOrigin="anonymous" />
+          <img id="tex-npc-silhouette" src="/assets/npc_silhouette.png" crossOrigin="anonymous" />
+          <img id="tex-dialog-bg" src="/assets/dialog_bg.png" crossOrigin="anonymous" />
         </a-assets>
 
         {currentRoom === 'LOBBY' && (
@@ -451,30 +501,68 @@ function App() {
         {currentRoom === 'Raksha Basic' && roomStage === 'room1' && (
           <RakshaBasicRoom1
             onInteractTerminal={() => {
-              setKeyboardContext('room1-exit');
-              handleVRTerminalClick();
+              setKeyboardConfig({ context: 'room1-exit', position: '0 1.4 -10.8', rotation: '-10 0 0' });
+              setShowKeyboard(true);
             }}
           />
         )}
 
         {currentRoom === 'Raksha Basic' && roomStage === 'corridor' && (
-          <RakshaBasicCorridor />
+          <RakshaBasicCorridor
+            onBackToRoom1={() => {
+              setRoomStage('room1');
+              const playerRig = document.getElementById('rig');
+              if (playerRig) {
+                playerRig.object3D.position.set(0, 0, 4.5);
+                playerRig.object3D.rotation.set(0, 0, 0);
+              }
+            }}
+            onEnterRoom2={() => {
+              setKeyboardConfig({ context: 'room2-enter', position: '0 1.4 -40.5', rotation: '-10 0 0' });
+              setShowKeyboard(true);
+            }}
+          />
+        )}
+
+        {currentRoom === 'Raksha Basic' && roomStage === 'room2' && (
+          <RakshaBasicRoom2
+            onBackToCorridor={() => {
+              setRoomStage('corridor');
+              const playerRig = document.getElementById('rig');
+              if (playerRig) {
+                playerRig.object3D.position.set(0, 0, -40);
+                playerRig.object3D.rotation.set(0, 0, 0);
+              }
+            }}
+            onBackToMainMenu={() => {
+              setCurrentRoom('LOBBY');
+              setRoomStage('room1');
+              const playerRig = document.getElementById('rig');
+              if (playerRig) {
+                playerRig.object3D.position.set(0, 0, 0);
+                playerRig.object3D.rotation.set(0, 0, 0);
+              }
+            }}
+          />
         )}
 
         {currentRoom !== 'LOBBY' && (
           <a-sky color="#0a0e14"></a-sky>
         )}
 
+        {/* =======================================================
+            POSISI KEYBOARD SEKARANG DINAMIS MENGIKUTI KONFIGURASI
+            ======================================================= */}
         {showKeyboard && (
           <VirtualKeyboard
-            // Posisi Z diatur ke -11 agar pas melayang di depan pemain saat menekan terminal Gerbang Keluar Room 1
-            position={currentRoom === 'Raksha Basic' ? "0 1.4 -10.8" : "0 1.5 -2"}
-            rotation="-10 0 0"
+            position={keyboardConfig.position}
+            rotation={keyboardConfig.rotation}
             currentInput={pin}
             onKeyPress={handleVirtualKeyPress}
             onClose={() => setShowKeyboard(false)}
           />
         )}
+        
         <PlayerRig
           isKeyboardOpen={showKeyboard}
           onToggleKeyboard={() => setShowKeyboard(!showKeyboard)}
@@ -483,8 +571,6 @@ function App() {
           onVRTerminalClick={handleVRTerminalClick}
           currentInput={pin}
           handleVirtualKeyPress={handleVirtualKeyPress}
-
-          // Tambahkan baris ini:
           isTransitioning={isTransitioning}
         />
       </a-scene>

@@ -254,10 +254,6 @@ YAW : ${THREE.MathUtils.radToDeg(r.y).toFixed(1)}`
           <a-entity position="0 0.15 -0.7">
             <a-plane ref={hudRef} width="2.2" height="1.1"
               material="shader: flat; transparent: true; side: double; alphaTest: 0.01"></a-plane>
-            <a-box ref={terminalRef} className="clickable" position="0 -0.38 0.03"
-              width="0.6" height="0.06" depth="0.02"
-              material="color: #06b6d4; opacity: 0.04; transparent: true"
-              onClick={onVRTerminalClick}></a-box>
           </a-entity>
         )}
       </a-camera>
