@@ -87,26 +87,6 @@ function Locker({ position, rotation = "0 0 0", containsPaper = false, playerHas
                         animation__leave="property: scale; to: 1 1 1; startEvents: mouseleave; dur: 150"
                         onClick={(e) => { e.stopPropagation(); onPaperPickup(); }}
                     ></a-plane>
-
-                    {/* <a-entity position="0 -0.32 0.02">
-                        <a-box width="0.3" height="0.11" depth="0.02" color="#16a34a"
-                            className="clickable"
-                            animation__hover="property: scale; to: 1.08 1.08 1.08; startEvents: mouseenter; dur: 150"
-                            animation__leave="property: scale; to: 1 1 1; startEvents: mouseleave; dur: 150"
-                            onClick={(e) => { e.stopPropagation(); onPaperPickup(); }}
-                        ></a-box>
-                        <a-text value="AMBIL" position="0 0 0.02" align="center" color="#ffffff" scale="0.12 0.12 0.12" font="mozillavr"></a-text>
-                    </a-entity>
-
-                    <a-entity position="0 -0.48 0.02">
-                        <a-box width="0.3" height="0.11" depth="0.02" color="#475569"
-                            className="clickable"
-                            animation__hover="property: scale; to: 1.08 1.08 1.08; startEvents: mouseenter; dur: 150"
-                            animation__leave="property: scale; to: 1 1 1; startEvents: mouseleave; dur: 150"
-                            onClick={(e) => { e.stopPropagation(); setIsOpen(false); }}
-                        ></a-box>
-                        <a-text value="TUTUP" position="0 0 0.02" align="center" color="#ffffff" scale="0.12 0.12 0.12" font="mozillavr"></a-text>
-                    </a-entity> */}
                 </a-entity>
             )}
 

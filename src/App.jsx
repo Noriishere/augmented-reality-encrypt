@@ -6,6 +6,7 @@ import MainMenu from './rooms/MainMenu';
 import RakshaBasicRoom1 from './rooms/RakshaBasic/Room1';
 import RakshaBasicCorridor from './rooms/RakshaBasic/Corridor';
 import RakshaBasicRoom2 from './rooms/RakshaBasic/Room2';
+import RakshaExpertRoom1 from './rooms/RakshaExpert/Room1';
 
 /* ============================================================
    Canvas HUD — close to player, glitch working, clickable
@@ -554,7 +555,9 @@ function App() {
         {currentRoom !== 'LOBBY' && (
           <a-sky color="#0a0e14"></a-sky>
         )}
-
+        {currentRoom === 'Raksha Expert' && (
+          <RakshaExpertRoom1 onInteractTerminal={handleVRTerminalClick} />
+        )}
         {/* =======================================================
             POSISI KEYBOARD SEKARANG DINAMIS MENGIKUTI KONFIGURASI
             ======================================================= */}
