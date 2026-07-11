@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
 /* ============================================================
    A-FRAME CUSTOM COMPONENT: FOLLOW CAMERA
@@ -23,63 +23,94 @@ if (typeof AFRAME !== 'undefined' && !AFRAME.components['follow-camera']) {
 /* ============================================================
    LOCKER COMPONENT
    ============================================================ */
-function Locker({ position, rotation = "0 0 0", hasPaper = false, onPaperPickup }) {
+function Locker({ position, rotation = "0 0 0", containsPaper = false, playerHasPaper = false, onPaperPickup }) {
     const [isOpen, setIsOpen] = useState(false);
+    const hingeRef = useRef(null);
+
+    useEffect(() => {
+        const hinge = hingeRef.current;
+        if (!hinge) return;
+        hinge.emit(isOpen ? 'door-open' : 'door-close');
+    }, [isOpen]);
+
+    const toggleDoor = (e) => {
+        e.stopPropagation();
+        setIsOpen(prev => !prev);
+    };
+
+    // Kertas cuma tampil kalau: locker ini memang berisi kertas, pintunya terbuka,
+    // DAN player belum pegang kertasnya (biar gak duplikat kalau dibuka lagi)
+    const showPaper = containsPaper && isOpen && !playerHasPaper;
 
     return (
         <a-entity position={position} rotation={rotation}>
-            {/* Brankas — box utama */}
-            <a-box class="solid" position="0 1.2 0" width="0.8" height="2.4" depth="0.6"
-                color="#6b7280" material="roughness: 0.5; metalness: 0.6"></a-box>
-            
-            {/* Pintu brankas */}
-            <a-plane position="0 1.2 0.31" width="0.75" height="2.3"
-                material={`src: ${isOpen ? "#tex-locker-open" : "#tex-locker-front"}; roughness: 0.5; metalness: 0.4`}></a-plane>
-            
-            {/* Handle */}
-            <a-box position="0.25 1.2 0.33" width="0.04" height="0.15" depth="0.04"
-                color="#4b5563" material="roughness: 0.3; metalness: 0.7"></a-box>
+            {/* ===== BADAN LOCKER — TANPA SISI DEPAN ===== */}
+            <a-box class="solid" position="0 1.2 -0.2" width="0.8" height="2.4" depth="0.04"
+                color="#4b5158" material="src: #tex-locker-open; roughness: 0.6; metalness: 0.5"></a-box>
+            <a-box class="solid" position="-0.38 1.2 -0.1" width="0.04" height="2.4" depth="0.44"
+                color="#5b6169" material="roughness: 0.5; metalness: 0.6"></a-box>
+            <a-box class="solid" position="0.38 1.2 -0.1" width="0.04" height="2.4" depth="0.44"
+                color="#5b6169" material="roughness: 0.5; metalness: 0.6"></a-box>
+            <a-box class="solid" position="0 2.42 -0.1" width="0.8" height="0.04" depth="0.44"
+                color="#5b6169" material="roughness: 0.5; metalness: 0.6"></a-box>
+            <a-box class="solid" position="0 -0.01 -0.1" width="0.8" height="0.04" depth="0.44"
+                color="#5b6169" material="roughness: 0.5; metalness: 0.6"></a-box>
 
-            {/* AREA KLIK BUKA PINTU (Saat Tertutup) */}
-            {!isOpen && (
-                <a-box className="clickable" position="0 1.2 0.35" width="0.7" height="2.3" depth="0.3"
-                    material="opacity: 0; transparent: true"
-                    onClick={(e) => {
-                        e.stopPropagation(); 
-                        setIsOpen(true);
-                        // Langsung munculkan pop-up saat pintu dibuka (jika ada kertas)
-                        if (hasPaper && onPaperPickup) {
-                            onPaperPickup();
-                        }
-                    }}></a-box>
-            )}
+            {/* ===== PINTU — HINGED ===== */}
+            <a-entity
+                ref={hingeRef}
+                position="-0.38 1.2 0.1"
+                rotation="0 0 0"
+                animation__open="property: rotation; to: 0 -100 0; dur: 450; easing: easeOutQuad; startEvents: door-open"
+                animation__close="property: rotation; to: 0 0 0; dur: 350; easing: easeInQuad; startEvents: door-close"
+            >
+                <a-box
+                    className="clickable"
+                    position="0.375 0 0"
+                    width="0.75" height="2.3" depth="0.05"
+                    material={`src: ${isOpen ? "#tex-locker-front" : "#tex-locker-front"}; roughness: 0.5; metalness: 0.4`}
+                    animation__hover="property: scale; to: 1.02 1.02 1.02; startEvents: mouseenter; dur: 150"
+                    animation__leave="property: scale; to: 1 1 1; startEvents: mouseleave; dur: 150"
+                    onClick={toggleDoor}
+                ></a-box>
+                <a-box position="0.68 0 0.03" width="0.04" height="0.15" depth="0.04"
+                    color="#4b5563" material="roughness: 0.3; metalness: 0.7"></a-box>
+            </a-entity>
 
-            {/* AREA KLIK TUTUP PINTU (Saat Terbuka, digeser ke pinggir agar kertas bisa diklik) */}
-            {isOpen && (
-                <a-box className="clickable" position="-0.3 1.2 0.35" width="0.15" height="2.3" depth="0.3"
-                    material="opacity: 0; transparent: true"
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        setIsOpen(false);
-                    }}></a-box>
-            )}
+            {/* ===== KERTAS + TOMBOL — SEMUA DI DALAM LOCKER, DEKAT KERTAS ===== */}
+            {showPaper && (
+                <a-entity position="0 2 -0.1">
+                    <a-plane width="0.28" height="0.38" rotation="0 0 5"
+                        material="src: #tex-paper-note; roughness: 0.8; side: double"
+                        className="clickable"
+                        animation__hover="property: scale; to: 1.08 1.08 1.08; startEvents: mouseenter; dur: 150"
+                        animation__leave="property: scale; to: 1 1 1; startEvents: mouseleave; dur: 150"
+                        onClick={(e) => { e.stopPropagation(); onPaperPickup(); }}
+                    ></a-plane>
 
-            {/* Kertas fisik di dalam brankas (Bisa diklik lagi jika pop-up tak sengaja tertutup) */}
-            {isOpen && hasPaper && (
-                <a-entity position="0 0.8 0.1">
-                    <a-plane width="0.3" height="0.4" rotation="0 0 5"
-                        material="src: #tex-paper-note; roughness: 0.8; side: double"></a-plane>
-                    <a-box className="clickable" position="0 0 0.05" width="0.4" height="0.5" depth="0.2"
-                        material="opacity: 0; transparent: true"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            if (onPaperPickup) onPaperPickup();
-                        }}></a-box>
+                    {/* <a-entity position="0 -0.32 0.02">
+                        <a-box width="0.3" height="0.11" depth="0.02" color="#16a34a"
+                            className="clickable"
+                            animation__hover="property: scale; to: 1.08 1.08 1.08; startEvents: mouseenter; dur: 150"
+                            animation__leave="property: scale; to: 1 1 1; startEvents: mouseleave; dur: 150"
+                            onClick={(e) => { e.stopPropagation(); onPaperPickup(); }}
+                        ></a-box>
+                        <a-text value="AMBIL" position="0 0 0.02" align="center" color="#ffffff" scale="0.12 0.12 0.12" font="mozillavr"></a-text>
+                    </a-entity>
+
+                    <a-entity position="0 -0.48 0.02">
+                        <a-box width="0.3" height="0.11" depth="0.02" color="#475569"
+                            className="clickable"
+                            animation__hover="property: scale; to: 1.08 1.08 1.08; startEvents: mouseenter; dur: 150"
+                            animation__leave="property: scale; to: 1 1 1; startEvents: mouseleave; dur: 150"
+                            onClick={(e) => { e.stopPropagation(); setIsOpen(false); }}
+                        ></a-box>
+                        <a-text value="TUTUP" position="0 0 0.02" align="center" color="#ffffff" scale="0.12 0.12 0.12" font="mozillavr"></a-text>
+                    </a-entity> */}
                 </a-entity>
             )}
-            
-            {/* Status indicator */}
-            <a-sphere position="0.3 2.3 0.32" radius="0.02"
+
+            <a-sphere position="0.3 2.4 0.13" radius="0.02"
                 material={`color: ${isOpen ? "#00ff00" : "#ff4444"}; emissive: ${isOpen ? "#00ff00" : "#ff4444"}; emissiveIntensity: 2`}></a-sphere>
         </a-entity>
     );
@@ -93,11 +124,11 @@ function HeldPaper({ onDrop }) {
         <a-entity follow-camera position="-0.4 -0.3 -0.5" rotation="-15 20 0">
             <a-plane width="0.3" height="0.4"
                 material="src: #tex-paper-note; roughness: 0.8; side: double"></a-plane>
-            
-            <a-text value="RAHASIA:" position="0 0.12 0.01" align="center" color="#333" scale="0.08 0.08 0.08" font="mozillavr"></a-text>
+
+            {/* <a-text value="RAHASIA:" position="0 0.12 0.01" align="center" color="#333" scale="0.08 0.08 0.08" font="mozillavr"></a-text>
             <a-text value="Kode: ouwo" position="0 0.02 0.01" align="center" color="#c00" scale="0.1 0.1 0.1" font="mozillavr"></a-text>
-            <a-text value="untuk Room 2" position="0 -0.06 0.01" align="center" color="#333" scale="0.06 0.06 0.06" font="mozillavr"></a-text>
-            
+            <a-text value="untuk Room 2" position="0 -0.06 0.01" align="center" color="#333" scale="0.06 0.06 0.06" font="mozillavr"></a-text> */}
+
             {/* Hitbox untuk membuang (Drop) kertas */}
             <a-box className="clickable" position="0 0 0.02" width="0.35" height="0.45" depth="0.05"
                 material="opacity: 0; transparent: true"
@@ -112,17 +143,16 @@ function HeldPaper({ onDrop }) {
 /* ============================================================
    CORRIDOR
    ============================================================ */
-export default function Corridor({ onBackToRoom1, onEnterRoom2 }) {
+export default function Corridor({ onBackToRoom1, onEnterRoom2, hasPaper, onPickPaper, onDropPaper }) {
     const [showPaperPopup, setShowPaperPopup] = useState(false);
-    const [isHoldingPaper, setIsHoldingPaper] = useState(false); // State penyimpan status tangan
 
     const handlePaperTake = () => {
-        setShowPaperPopup(false); // Tutup pop-up
-        setIsHoldingPaper(true);  // Kertas pindah ke tangan kiri
+        setShowPaperPopup(false);
+        onPickPaper(); // <-- panggil prop, bukan setIsHoldingPaper(true)
     };
 
     const handlePaperDrop = () => {
-        setIsHoldingPaper(false); // Kertas dibuang dari tangan
+        onDropPaper(); // <-- panggil prop, bukan setIsHoldingPaper(false)
     };
 
     return (
@@ -147,54 +177,15 @@ export default function Corridor({ onBackToRoom1, onEnterRoom2 }) {
                 material="src: #tex-office-ceiling; repeat: 2 10; roughness: 0.9"></a-box>
 
             {/* ========== 4 BRANKAS di dinding kiri ========== */}
-            <Locker position="-2.2 0 -18" rotation="0 90 0" hasPaper={false} />
-            <Locker position="-2.2 0 -22" rotation="0 90 0" hasPaper={true} 
-                onPaperPickup={() => {
-                    // Hanya munculkan pop-up kalau tangan sedang tidak memegang kertas
-                    if (!isHoldingPaper) setShowPaperPopup(true);
-                }} 
+            <Locker position="-2.2 0 -18" rotation="0 90 0" containsPaper={false} playerHasPaper={hasPaper} />
+            <Locker position="-2.2 0 -22" rotation="0 90 0" containsPaper={true} playerHasPaper={hasPaper}
+                onPaperPickup={onPickPaper}
             />
-            <Locker position="-2.2 0 -26" rotation="0 90 0" hasPaper={false} />
-            <Locker position="-2.2 0 -30" rotation="0 90 0" hasPaper={false} />
-
-            {/* ========== PAPER POPUP (Panel Baca Statis) ========== */}
-            {showPaperPopup && (
-                <a-entity position="-1.2 1.4 -22" rotation="0 90 0" scale="0.8 0.8 0.8">
-                    <a-box position="0 0 -0.05" width="2" height="2.5" depth="0.05"
-                        material="color: #0f172a; opacity: 0.95; transparent: true"></a-box>
-                    <a-plane position="0 0.2 0" width="1.5" height="2"
-                        material="src: #tex-paper-note; roughness: 0.8; side: double"></a-plane>
-                    
-                    <a-text value="RAHASIA:" position="0 0.7 0.01" align="center" color="#333" scale="0.15 0.15 0.15" font="mozillavr"></a-text>
-                    <a-text value="Kode: ouwo" position="0 0.4 0.01" align="center" color="#c00" scale="0.15 0.15 0.15" font="mozillavr"></a-text>
-                    <a-text value="untuk Room 2" position="0 0.2 0.01" align="center" color="#333" scale="0.1 0.1 0.1" font="mozillavr"></a-text>
-                    
-                    {/* TOMBOL AMBIL KERTAS */}
-                    <a-entity position="0 -0.45 0">
-                        <a-box width="1" height="0.3" depth="0.05" color="#16a34a"
-                            className="clickable"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                handlePaperTake();
-                            }}></a-box>
-                        <a-text value="AMBIL" position="0 0 0.03" align="center" color="#ffffff" scale="0.25 0.25 0.25"></a-text>
-                    </a-entity>
-
-                    {/* TOMBOL TUTUP POP-UP */}
-                    <a-entity position="0 -0.85 0">
-                        <a-box width="1" height="0.3" depth="0.05" color="#475569"
-                            className="clickable"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                setShowPaperPopup(false);
-                            }}></a-box>
-                        <a-text value="TUTUP" position="0 0 0.03" align="center" color="#ffffff" scale="0.25 0.25 0.25"></a-text>
-                    </a-entity>
-                </a-entity>
-            )}
+            <Locker position="-2.2 0 -26" rotation="0 90 0" containsPaper={false} playerHasPaper={hasPaper} />
+            <Locker position="-2.2 0 -30" rotation="0 90 0" containsPaper={false} playerHasPaper={hasPaper} />
 
             {/* ========== HELD PAPER (Kertas di Tangan) ========== */}
-            {isHoldingPaper && <HeldPaper onDrop={handlePaperDrop} />}
+            {hasPaper && <HeldPaper onDrop={handlePaperDrop} />}
 
             {/* ========== PINTU KEMBALI KE ROOM 1 (z=-13) ========== */}
             <a-entity id="door-back-room1" position="0 0 -13">
@@ -230,13 +221,13 @@ export default function Corridor({ onBackToRoom1, onEnterRoom2 }) {
                     <a-text value="Masukkan Kode" position="0 0.16 0.07" align="center" color="#94a3b8" scale="0.27 0.27 0.27"></a-text>
                     <a-text value="Hint: Kode dari kertas di brankas" position="0 0.04 0.07" align="center" color="#facc15" scale="0.18 0.18 0.18"></a-text>
                     <a-entity position="0 -0.18 0.07">
-                        
+
                         {/* PERBAIKAN DI SINI: Hapus window.dispatchEvent dan ganti dengan onClick={onEnterRoom2} */}
                         <a-box width="1.1" height="0.28" depth="0.06" color="#0284c7" className="clickable"
                             animation__hover="property: scale; to: 1.05 1.05 1.05; startEvents: mouseenter; dur: 200"
                             animation__leave="property: scale; to: 1 1 1; startEvents: mouseleave; dur: 200"
                             onClick={onEnterRoom2}></a-box>
-                            
+
                         <a-text value="BUKA KEYBOARD" position="0 0 0.04" align="center" color="#ffffff" scale="0.38 0.38 0.38" font="mozillavr"></a-text>
                     </a-entity>
                 </a-entity>

@@ -257,7 +257,7 @@ function App() {
   const [pin, setPin] = useState('');
   const [isVRMode, setIsVRMode] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
-
+  const [hasPaper, setHasPaper] = useState(false);
   const sceneRef = useRef(null);
   const vrHudTexture = useCanvasHUD({ currentRoom, isVRMode });
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -356,7 +356,7 @@ function App() {
       if (answer && pin.toUpperCase() === answer) {
         setShowKeyboard(false);
         setPin('');
-        
+
         if (keyboardConfig.context === 'room1-exit') {
           goToCorridor();
         } else if (keyboardConfig.context === 'room2-enter') {
@@ -509,6 +509,9 @@ function App() {
 
         {currentRoom === 'Raksha Basic' && roomStage === 'corridor' && (
           <RakshaBasicCorridor
+            hasPaper={hasPaper}
+            onPickPaper={() => setHasPaper(true)}
+            onDropPaper={() => setHasPaper(false)}
             onBackToRoom1={() => {
               setRoomStage('room1');
               const playerRig = document.getElementById('rig');
@@ -526,17 +529,19 @@ function App() {
 
         {currentRoom === 'Raksha Basic' && roomStage === 'room2' && (
           <RakshaBasicRoom2
+            hasPaper={hasPaper}
             onBackToCorridor={() => {
               setRoomStage('corridor');
               const playerRig = document.getElementById('rig');
               if (playerRig) {
-                playerRig.object3D.position.set(0, 0, -40);
+                playerRig.object3D.position.set(0, 0, -15);
                 playerRig.object3D.rotation.set(0, 0, 0);
               }
             }}
             onBackToMainMenu={() => {
               setCurrentRoom('LOBBY');
               setRoomStage('room1');
+              setHasPaper(false); // reset saat kembali ke menu, biar main ulang bersih
               const playerRig = document.getElementById('rig');
               if (playerRig) {
                 playerRig.object3D.position.set(0, 0, 0);
@@ -562,7 +567,7 @@ function App() {
             onClose={() => setShowKeyboard(false)}
           />
         )}
-        
+
         <PlayerRig
           isKeyboardOpen={showKeyboard}
           onToggleKeyboard={() => setShowKeyboard(!showKeyboard)}
