@@ -427,18 +427,6 @@ YAW : ${THREE.MathUtils.radToDeg(r.y).toFixed(1)}`
           animation__fadeout="property: scale; to: 2 2 2; dur: 780; easing: easeInOutSine; startEvents: do-fade-out"
           animation__fadein="property: scale; to: 0 0 0; dur: 600; easing: easeInOutSine; startEvents: do-fade-in"
         ></a-circle>
-
-        {/* 3. KEYBOARD VIRTUAL DITEMPATKAN DI DALAM CAMERA */}
-        {isKeyboardOpen && (
-          <VirtualKeyboard
-            position="0 -0.3 -1.2"
-            rotation="-10 0 0"
-            currentInput={currentInput}
-            onKeyPress={handleVirtualKeyPress}
-            onClose={onToggleKeyboard}
-          />
-        )}
-
         {isVRMode && (
           <a-entity position="0 0.15 -0.7">
             <a-plane ref={hudRef} width="2.2" height="1.1"
