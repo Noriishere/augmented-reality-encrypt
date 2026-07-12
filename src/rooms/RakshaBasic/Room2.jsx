@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from 'react';
+import { room2Dialogues } from './dialogues';
 
 /* ============================================================
    NPC COMPONENT — dialog ala gambar referensi
+   Sekarang narik nama/teks/warna/hasil dari room2Dialogues.js
+   lewat npcKey, jadi teksnya cuma ada di SATU tempat (dialogues.js).
    ============================================================ */
-function NPC({ position, rotation = "0 0 0", name, subtitle, dialog, texture, isCorrect, onChoice }) {
+function NPC({ position, rotation = "0 0 0", npcKey, texture, onChoice }) {
     const [showDialog, setShowDialog] = useState(false);
+    const data = room2Dialogues[npcKey];
 
     return (
         <a-entity position={position} rotation={rotation}>
@@ -16,10 +20,10 @@ function NPC({ position, rotation = "0 0 0", name, subtitle, dialog, texture, is
             <a-plane position="0 1.5 0.06" width="1.4" height="2.9"
                 material={`src: ${texture}; roughness: 0.6; side: front`}></a-plane>
 
-            {/* Name tag */}
+            {/* Name tag — warna pakai isCorrect (success) dari data.js */}
             <a-box position="0 -0.1 0.06" width="1.5" height="0.3" depth="0.05"
-                color={isCorrect ? "#7c3aed" : "#475569"}></a-box>
-            <a-text value={name} position="0 -0.1 0.1" align="center" color="#ffffff" scale="0.4 0.4 0.4" font="mozillavr"></a-text>
+                color={data.success ? "#7c3aed" : "#475569"}></a-box>
+            <a-text value={data.name} position="0 -0.1 0.1" align="center" color="#ffffff" scale="0.4 0.4 0.4" font="mozillavr"></a-text>
 
             {/* Click area untuk memunculkan pop-up */}
             <a-box className="clickable" position="0 1.5 0.2" width="1.5" height="3" depth="0.5"
@@ -32,16 +36,15 @@ function NPC({ position, rotation = "0 0 0", name, subtitle, dialog, texture, is
                     {/* Background Utama */}
                     <a-plane position="0 0 0" width="3.6" height="2.2"
                         material="color: #0f172a; roughness: 0.8; side: double"></a-plane>
-                    {/* Border / Garis Tepi */}
+                    {/* Border / Garis Tepi — warna khas tiap NPC dari data.js */}
                     <a-plane position="0 0 -0.01" width="3.66" height="2.26"
-                        material="color: #38bdf8; roughness: 0.8; side: double"></a-plane>
+                        material={`color: ${data.color}; roughness: 0.8; side: double`}></a-plane>
 
-                    {/* Header (Nama & Subtitle) */}
-                    <a-text value={name.toUpperCase()} position="0 0.8 0.02" align="center" color="#38bdf8" scale="0.65 0.65 0.65" font="mozillavr"></a-text>
-                    <a-text value={`"${subtitle}"`} position="0 0.55 0.02" align="center" color="#94a3b8" scale="0.35 0.35 0.35" font="mozillavr"></a-text>
+                    {/* Header (Nama) */}
+                    <a-text value={data.name.toUpperCase()} position="0 0.8 0.02" align="center" color={data.color} scale="0.65 0.65 0.65" font="mozillavr"></a-text>
 
                     {/* Teks Dialog Utama */}
-                    <a-text value={dialog} position="0 0.05 0.02" align="center" color="#f8fafc" scale="0.45 0.45 0.45" width="3.2" wrap-count="38" font="mozillavr"></a-text>
+                    <a-text value={data.text} position="0 0.05 0.02" align="center" color="#f8fafc" scale="0.45 0.45 0.45" width="3.2" wrap-count="38" font="mozillavr"></a-text>
 
                     {/* Barisan Tombol */}
                     <a-entity position="0 -0.75 0.02">
@@ -61,10 +64,10 @@ function NPC({ position, rotation = "0 0 0", name, subtitle, dialog, texture, is
                                 className="clickable"
                                 animation__hover="property: scale; to: 1.05 1.05 1.05; startEvents: mouseenter; dur: 150"
                                 animation__leave="property: scale; to: 1 1 1; startEvents: mouseleave; dur: 150"
-                                onClick={(e) => { 
-                                    e.stopPropagation(); 
+                                onClick={(e) => {
+                                    e.stopPropagation();
                                     setShowDialog(false); // Tutup dialog ini
-                                    onChoice(isCorrect, position, rotation); // Kirim koordinat ke Room2
+                                    onChoice(npcKey, position, rotation); // Kirim id NPC + koordinat ke Room2
                                 }}></a-box>
                             <a-text value="BERI PASSWORD" position="0 0 0.03" align="center" color="#ffffff" scale="0.28 0.28 0.28" font="mozillavr"></a-text>
                         </a-entity>
@@ -76,22 +79,30 @@ function NPC({ position, rotation = "0 0 0", name, subtitle, dialog, texture, is
 }
 
 /* ============================================================
-   HIJACKED POPUP
+   HIJACKED POPUP — resultMessage dipecah jadi header + body
+   Format di dialogues.js: "[ JUDUL ]\n\nIsi penjelasan..."
    ============================================================ */
-function HijackedPopup({ position, rotation, onRestart }) {
+function HijackedPopup({ position, rotation, resultMessage, onRestart }) {
+    const [header, ...rest] = (resultMessage || "").split("\n\n");
+    const body = rest.join("\n\n");
+
     return (
         <a-entity position={position} rotation={rotation}>
             <a-entity id="hijacked-popup" position="0 1.6 1.8">
-                <a-plane position="0 0 -0.02" width="3.4" height="2.2"
+                <a-plane position="0 0 -0.02" width="3.6" height="2.6"
                     material="color: #ffffff; roughness: 0.9; side: double"></a-plane>
-                <a-plane position="0 0 -0.03" width="3.48" height="2.28"
+                <a-plane position="0 0 -0.03" width="3.68" height="2.68"
                     material="color: #dc2626; roughness: 0.9; side: double"></a-plane>
-                
-                <a-text value="HIJACKED" position="0 0.6 0.01" align="center" color="#dc2626" scale="0.8 0.8 0.8" font="mozillavr"></a-text>
-                <a-text value="Kamu salah memberikan seseorang password" position="0 0.1 0.01" align="center" color="#333" scale="0.28 0.28 0.28" font="mozillavr"></a-text>
-                <a-text value="dan akun kamu diambil alih olehnya!" position="0 -0.15 0.01" align="center" color="#333" scale="0.28 0.28 0.28" font="mozillavr"></a-text>
-                
-                <a-entity position="0 -0.7 0.01">
+
+                <a-text value="HIJACKED" position="0 0.9 0.01" align="center" color="#dc2626" scale="0.8 0.8 0.8" font="mozillavr"></a-text>
+
+                {header && (
+                    <a-text value={header} position="0 0.6 0.01" align="center" color="#991b1b" scale="0.3 0.3 0.3" font="mozillavr" width="3.3" wrap-count="42"></a-text>
+                )}
+
+                <a-text value={body} position="0 0.05 0.01" align="center" color="#333" scale="0.26 0.26 0.26" font="mozillavr" width="3.3" wrap-count="44"></a-text>
+
+                <a-entity position="0 -1.0 0.01">
                     <a-box width="1.8" height="0.45" depth="0.02" color="#dc2626"
                         className="clickable"
                         animation__hover="property: scale; to: 1.05 1.05 1.05; startEvents: mouseenter; dur: 150"
@@ -105,28 +116,30 @@ function HijackedPopup({ position, rotation, onRestart }) {
 }
 
 /* ============================================================
-   SUCCESS POPUP
+   SUCCESS POPUP — resultMessage dipecah jadi header + body,
+   sama seperti HijackedPopup
    ============================================================ */
-function SuccessPopup({ position, rotation, onMainMenu }) {
+function SuccessPopup({ position, rotation, resultMessage, onMainMenu }) {
+    const [header, ...rest] = (resultMessage || "").split("\n\n");
+    const body = rest.join("\n\n");
+
     return (
         <a-entity position={position} rotation={rotation}>
             <a-entity id="success-popup" position="0 1.6 1.8">
-                <a-plane position="0 0 -0.02" width="3.6" height="2.6"
+                <a-plane position="0 0 -0.02" width="3.6" height="2.8"
                     material="color: #f0fdf4; roughness: 0.9; side: double"></a-plane>
-                <a-plane position="0 0 -0.03" width="3.68" height="2.68"
+                <a-plane position="0 0 -0.03" width="3.68" height="2.88"
                     material="color: #16a34a; roughness: 0.9; side: double"></a-plane>
-                
-                <a-text value="SELAMAT!" position="0 0.8 0.01" align="center" color="#16a34a" scale="0.8 0.8 0.8" font="mozillavr"></a-text>
-                <a-text value="Kamu berhasil memilih" position="0 0.4 0.01" align="center" color="#333" scale="0.3 0.3 0.3" font="mozillavr"></a-text>
-                <a-text value="orang yang tepat!" position="0 0.1 0.01" align="center" color="#333" scale="0.3 0.3 0.3" font="mozillavr"></a-text>
-                
-                <a-text value="Orang Tua akan menjaga" position="0 -0.3 0.01" align="center" color="#555" scale="0.25 0.25 0.25" font="mozillavr"></a-text>
-                <a-text value="data dan sandimu dengan aman." position="0 -0.5 0.01" align="center" color="#555" scale="0.25 0.25 0.25" font="mozillavr"></a-text>
-                
-                <a-text value="Jangan pernah bagikan sandi" position="0 -0.8 0.01" align="center" color="#ca8a04" scale="0.22 0.22 0.22" font="mozillavr"></a-text>
-                <a-text value="kepada orang yang tidak dikenal!" position="0 -1.0 0.01" align="center" color="#ca8a04" scale="0.22 0.22 0.22" font="mozillavr"></a-text>
-                
-                <a-entity position="0 -1.45 0.01">
+
+                <a-text value="SELAMAT!" position="0 1.05 0.01" align="center" color="#16a34a" scale="0.8 0.8 0.8" font="mozillavr"></a-text>
+
+                {header && (
+                    <a-text value={header} position="0 0.72 0.01" align="center" color="#15803d" scale="0.28 0.28 0.28" font="mozillavr" width="3.3" wrap-count="44"></a-text>
+                )}
+
+                <a-text value={body} position="0 0.05 0.01" align="center" color="#333" scale="0.25 0.25 0.25" font="mozillavr" width="3.3" wrap-count="42"></a-text>
+
+                <a-entity position="0 -1.2 0.01">
                     <a-box width="2.4" height="0.5" depth="0.02" color="#16a34a"
                         className="clickable"
                         animation__hover="property: scale; to: 1.05 1.05 1.05; startEvents: mouseenter; dur: 150"
@@ -148,18 +161,18 @@ function SelfExitPopup({ position, rotation, onMainMenu }) {
             <a-entity id="self-exit-popup" position="0 2.0 2.6">
                 <a-plane position="0 0 -0.02" width="4.0" height="2.6" material="color: #f8fafc; roughness: 0.9; side: double"></a-plane>
                 <a-plane position="0 0 -0.03" width="4.08" height="2.68" material="color: #0ea5e9; roughness: 0.9; side: double"></a-plane>
-                
+
                 <a-text value="PILIHAN MANDIRI!" position="0 0.8 0.01" align="center" color="#0284c7" scale="0.8 0.8 0.8" font="mozillavr"></a-text>
                 <a-text value="Selamat! Kamu memilih jalanmu sendiri." position="0 0.35 0.01" align="center" color="#333" scale="0.3 0.3 0.3" font="mozillavr"></a-text>
-                
+
                 <a-text value="Kamu tidak mudah percaya pada rayuan" position="0 -0.05 0.01" align="center" color="#555" scale="0.25 0.25 0.25" font="mozillavr"></a-text>
                 <a-text value="maupun ancaman di dunia maya." position="0 -0.25 0.01" align="center" color="#555" scale="0.25 0.25 0.25" font="mozillavr"></a-text>
-                
+
                 <a-text value="Mengamankan data secara mandiri adalah" position="0 -0.65 0.01" align="center" color="#ca8a04" scale="0.22 0.22 0.22" font="mozillavr"></a-text>
                 <a-text value="salah satu langkah privasi terbaik!" position="0 -0.85 0.01" align="center" color="#ca8a04" scale="0.22 0.22 0.22" font="mozillavr"></a-text>
-                
+
                 <a-entity position="0 -1.45 0.01">
-                    <a-box width="2.4" height="0.45" depth="0.02" color="#0284c7" className="clickable" 
+                    <a-box width="2.4" height="0.45" depth="0.02" color="#0284c7" className="clickable"
                         animation__hover="property: scale; to: 1.05 1.05 1.05; startEvents: mouseenter; dur: 150"
                         animation__leave="property: scale; to: 1 1 1; startEvents: mouseleave; dur: 150"
                         onClick={onMainMenu}></a-box>
@@ -206,7 +219,8 @@ export default function Room2({ onBackToCorridor, onBackToMainMenu, hasPaper = f
     const [popupState, setPopupState] = useState({
         type: null, // 'hijacked', 'success', 'self-exit', 'nopaper', atau null
         position: "0 0 0",
-        rotation: "0 0 0"
+        rotation: "0 0 0",
+        resultMessage: ""
     });
 
     // Event listener penangkap event "room2-self-exit-success" dari App.jsx
@@ -215,7 +229,8 @@ export default function Room2({ onBackToCorridor, onBackToMainMenu, hasPaper = f
             setPopupState({
                 type: 'self-exit',
                 position: "0 0 -19.5", // Koordinat pintu keluar mandiri
-                rotation: "0 0 0"
+                rotation: "0 0 0",
+                resultMessage: ""
             });
         };
         window.addEventListener('room2-self-exit-success', handleSelfExit);
@@ -226,9 +241,9 @@ export default function Room2({ onBackToCorridor, onBackToMainMenu, hasPaper = f
     useEffect(() => {
         const camera = document.querySelector('a-camera');
         if (!camera) return;
-        
+
         let heldEl = document.getElementById('held-paper-entity');
-        
+
         if (!hasPaper) {
             if (heldEl) heldEl.remove();
             return;
@@ -239,7 +254,7 @@ export default function Room2({ onBackToCorridor, onBackToMainMenu, hasPaper = f
             heldEl.setAttribute('id', 'held-paper-entity');
             camera.appendChild(heldEl);
         }
-        
+
         heldEl.innerHTML = `
             <a-entity position="-0.4 -0.3 -0.5" rotation="-15 20 0">
                 <a-plane width="0.3" height="0.4"
@@ -257,22 +272,26 @@ export default function Room2({ onBackToCorridor, onBackToMainMenu, hasPaper = f
         };
     }, [hasPaper]); // Hook ini merespons nilai hasPaper
 
-    const handleChoice = (isCorrect, pos, rot) => {
+    // npcKey dikirim dari NPC lewat onChoice — data lengkap (success + resultMessage)
+    // langsung diambil dari room2Dialogues.js, satu sumber kebenaran untuk semua teks.
+    const handleChoice = (npcKey, pos, rot) => {
         // Cek dulu apakah player membawa kertas!
         if (!hasPaper) {
             setPopupState({
                 type: 'nopaper',
                 position: pos,
-                rotation: rot
+                rotation: rot,
+                resultMessage: ""
             });
             return;
         }
 
-        // Jika bawa kertas, lanjutkan eksekusi
+        const data = room2Dialogues[npcKey];
         setPopupState({
-            type: isCorrect ? 'success' : 'hijacked',
+            type: data.success ? 'success' : 'hijacked',
             position: pos,
-            rotation: rot
+            rotation: rot,
+            resultMessage: data.resultMessage
         });
     };
 
@@ -302,26 +321,18 @@ export default function Room2({ onBackToCorridor, onBackToMainMenu, hasPaper = f
             <a-box class="solid" position="0 4.9 5" width="4" height="0.2" depth="6"
                 material="src: #tex-office-ceiling; roughness: 0.9"></a-box>
 
-            {/* ========== 4 NPC ========== */}
+            {/* ========== 4 NPC — teks & warna sekarang dari room2Dialogues.js ========== */}
             <NPC position="-6 0 -3" rotation="0 30 0"
-                name="Teman Mabar" subtitle="Menawarkan top-up item game jika diberi sandi"
-                dialog="Hei kamu mau ku top up in game gak? Sesekali kita kan temen jadi aku mau top up in kamu, kamu mau kan? tapi berikan password akunmu yaa supaya aku bisa langsung top up in kamu."
-                texture="#npc-teman" isCorrect={false} onChoice={handleChoice} />
+                npcKey="temanMabar" texture="#npc-teman" onChoice={handleChoice} />
 
             <NPC position="6 0 -3" rotation="0 -30 0"
-                name="Sahabat" subtitle="Meminta sandi dengan alasan bukti persahabatan"
-                dialog="Kita kan udah lama sahabatan, kamu gaada niatan buat tukeran akun gitu? Kita kan sahabat selamanya, masa kamu gamau tuker rahasia?"
-                texture="#npc-sahabat" isCorrect={false} onChoice={handleChoice} />
+                npcKey="sahabat" texture="#npc-sahabat" onChoice={handleChoice} />
 
             <NPC position="-6 0 -13" rotation="0 45 0"
-                name="Admin Palsu" subtitle="Menakut-nakuti dan mengancam akan memblokir akun"
-                dialog="PERINGATAN KEAMANAN! Kami dari Tim Admin Pusat mendeteksi adanya aktivitas login ilegal di akunmu. Segera serahkan kata sandimu sekarang juga untuk proses verifikasi. Jika menolak, akun ini akan diblokir permanen!"
-                texture="#npc-admin" isCorrect={false} onChoice={handleChoice} />
+                npcKey="adminPalsu" texture="#npc-admin" onChoice={handleChoice} />
 
             <NPC position="6 0 -13" rotation="0 -45 0"
-                name="Orang Tua" subtitle="Satu-satunya pilihan yang benar"
-                dialog="Nak, ruangan ini penuh dengan orang-orang yang mencurigakan dan ingin mencuri datamu. Sini, titipkan kata sandimu ke Ayah/Ibu biar aman. Kami yang akan menjaganya untukmu dari para peretas itu."
-                texture="#npc-ortu" isCorrect={true} onChoice={handleChoice} />
+                npcKey="orangTua" texture="#npc-ortu" onChoice={handleChoice} />
 
             {/* Instruksi Tengah Ruangan */}
             <a-entity position="0 3.5 -8">
@@ -347,7 +358,7 @@ export default function Room2({ onBackToCorridor, onBackToMainMenu, hasPaper = f
                     material="src: #tex-office-roller; roughness: 0.5"></a-plane>
                 <a-box position="0 3.5 0.22" width="4" height="0.8" depth="0.05" color="#166534"
                     material="emissive: #14532d; emissiveIntensity: 0.6"></a-box>
-                
+
                 <a-text value="GERBANG KELUAR" position="0 3.6 0.25" align="center" color="#4ade80" scale="1 1 1" font="mozillavr"></a-text>
                 <a-text value="STATUS: TERKUNCI (Butuh Kode)" position="0 3.3 0.25" align="center" color="#bbf7d0" scale="0.35 0.35 0.35"></a-text>
 
@@ -369,15 +380,16 @@ export default function Room2({ onBackToCorridor, onBackToMainMenu, hasPaper = f
                                     setPopupState({
                                         type: 'nopaper',
                                         position: "0 0 -17.5", // Muncul di depan gerbang
-                                        rotation: "0 0 0"
+                                        rotation: "0 0 0",
+                                        resultMessage: ""
                                     });
                                 } else {
-                                    window.dispatchEvent(new CustomEvent('open-keyboard', { 
-                                        detail: { 
+                                    window.dispatchEvent(new CustomEvent('open-keyboard', {
+                                        detail: {
                                             context: 'room2-self-exit',
-                                            position: '0 1.4 -17.5', 
-                                            rotation: '-10 0 0' 
-                                        } 
+                                            position: '0 1.4 -17.5',
+                                            rotation: '-10 0 0'
+                                        }
                                     }));
                                 }
                             }}></a-box>
@@ -388,37 +400,39 @@ export default function Room2({ onBackToCorridor, onBackToMainMenu, hasPaper = f
 
             {/* ========== POPUPS DINAMIS ========== */}
             {popupState.type === 'nopaper' && (
-                <NoPaperPopup 
-                    position={popupState.position} 
-                    rotation={popupState.rotation} 
-                    onBackToCorridor={onBackToCorridor} 
+                <NoPaperPopup
+                    position={popupState.position}
+                    rotation={popupState.rotation}
+                    onBackToCorridor={onBackToCorridor}
                 />
             )}
 
             {popupState.type === 'hijacked' && (
-                <HijackedPopup 
-                    position={popupState.position} 
-                    rotation={popupState.rotation} 
-                    onRestart={() => { 
-                        setPopupState({ type: null, position: "0 0 0", rotation: "0 0 0" }); 
-                        onBackToCorridor(); 
-                    }} 
+                <HijackedPopup
+                    position={popupState.position}
+                    rotation={popupState.rotation}
+                    resultMessage={popupState.resultMessage}
+                    onRestart={() => {
+                        setPopupState({ type: null, position: "0 0 0", rotation: "0 0 0", resultMessage: "" });
+                        onBackToCorridor();
+                    }}
                 />
             )}
-            
+
             {popupState.type === 'success' && (
-                <SuccessPopup 
-                    position={popupState.position} 
-                    rotation={popupState.rotation} 
-                    onMainMenu={onBackToMainMenu} 
+                <SuccessPopup
+                    position={popupState.position}
+                    rotation={popupState.rotation}
+                    resultMessage={popupState.resultMessage}
+                    onMainMenu={onBackToMainMenu}
                 />
             )}
 
             {popupState.type === 'self-exit' && (
-                <SelfExitPopup 
-                    position={popupState.position} 
-                    rotation={popupState.rotation} 
-                    onMainMenu={onBackToMainMenu} 
+                <SelfExitPopup
+                    position={popupState.position}
+                    rotation={popupState.rotation}
+                    onMainMenu={onBackToMainMenu}
                 />
             )}
         </a-entity>

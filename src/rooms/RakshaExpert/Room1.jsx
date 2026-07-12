@@ -57,6 +57,51 @@ const CRACK_ESTIMATE = ["5 DETIK", "3 MENIT", "14 JAM", "2 TAHUN", "1.4 x 10^9 T
 const KEY_SCALE = "0.002 0.002 0.002";
 const KEY_SCALE_HOVER = "0.0023 0.0023 0.0023";
 
+function ExpertRoomWalls({ radius = 10, sides = 9, debug = false }) {
+
+    const SIDE = 2.2 * radius * Math.sin(Math.PI / sides);
+
+    const walls = Array.from({ length: sides }, (_, i) => {
+        const angleDeg = i * (360 / sides);
+        const angleRad = angleDeg * Math.PI / 180;
+        return {
+            x: radius * Math.sin(angleRad),
+            z: radius * Math.cos(angleRad),
+            rotY: angleDeg,
+        };
+    });
+
+    return (
+        <>
+            {walls.map((wall, i) => (
+                <React.Fragment key={`expert-oct-${i}`}>
+                    {/* Collider tak kasat mata — ini yang bikin kadet nggak bisa tembus */}
+                    <a-box
+                        class="solid"
+                        position={`${wall.x} 2.5 ${wall.z}`}
+                        rotation={`0 ${wall.rotY} 0`}
+                        width={SIDE - 0.20}
+                        height="5"
+                        depth="0.1"
+                        visible="false"
+                    />
+                    {/* Debug (opsional) — nyalain debug={true} kalau mau cek kerapatannya dulu */}
+                    {debug && (
+                        <a-box
+                            position={`${wall.x} 2.5 ${wall.z}`}
+                            rotation={`0 ${wall.rotY} 0`}
+                            width={SIDE - 0.15}
+                            height="5"
+                            depth="0.1"
+                            material="wireframe: true; color: red;"
+                        />
+                    )}
+                </React.Fragment>
+            ))}
+        </>
+    );
+}
+
 export default function RakshaExpertRoom1({ onInteractTerminal }) {
     // 0 = Intro/Alarm, 1 = Cryptographic Handshake, 2 = Firewall Grid, 3 = Aftermath (Refleksi)
     const [stage, setStage] = useState(0);
@@ -146,10 +191,13 @@ export default function RakshaExpertRoom1({ onInteractTerminal }) {
             )}
 
             {/* === LANTAI & DINDING === */}
-            <a-plane position="0 0 0" rotation="-90 0 0" width="20" height="20"
+            <a-plane position="0 0.01 0" rotation="-90 0 0" width="20" height="30"
                 color="#020617" material="roughness: 0.2; metalness: 0.8"></a-plane>
-            <a-cylinder position="0 2.5 0" radius="10" height="5" side="back"
+            <a-cylinder position="0 2.5 0" radius="11" height="5" side="back"
                 color="#0f172a" material="roughness: 0.7"></a-cylinder>
+
+            {/* Collider dinding — supaya kadet nggak bisa tembus dinding bulat di atas */}
+            <ExpertRoomWalls radius={10} sides={8} />
 
             {/* === PERINGATAN BERKEDIP DI DINDING (sebelum handshake selesai) === */}
             {stage < 1 && (
@@ -207,11 +255,11 @@ export default function RakshaExpertRoom1({ onInteractTerminal }) {
                     {/* --- TAHAP 2: FIREWALL GRID (monitor tengah) --- */}
                     {stage === 2 && !feedback && (
                         <a-entity>
-                            <a-text value="FIREWALL GRID: AKTIFKAN 4 PILAR DI PENJURU RUANGAN" position="0 0.85 0.02" align="center" color="#38bdf8" scale="0.26 0.26 0.26" wrap-count="62"></a-text>
+                            <a-text value="FIREWALL GRID: AKTIFKAN 4 PILAR DI PENJURU RUANGAN" position="0 0.70 0.02" align="center" color="#38bdf8" scale="0.80 0.80 0.80" wrap-count="62"></a-text>
                             <a-text value={`ESTIMASI JEBOL: ${crackLabel}`} position="0 0.4 0.02" align="center"
                                 color={allActive ? "#4ade80" : "#f87171"} scale="0.42 0.42 0.42"></a-text>
                             <a-text value={`Pilar aktif: ${activeCount}/4`} position="0 0.05 0.02" align="center"
-                                color="#94a3b8" scale="0.32 0.32 0.32"></a-text>
+                                color="#94a3b8" scale="0.80 0.80 0.80"></a-text>
 
                             {allActive ? (
                                 <a-entity position="0 -0.5 0.02">
@@ -223,7 +271,7 @@ export default function RakshaExpertRoom1({ onInteractTerminal }) {
                                 </a-entity>
                             ) : (
                                 <a-text value="Berbalik dan klik tiap pilar sirkuit di empat penjuru ruangan untuk menyalakannya."
-                                    position="0 -0.5 0.02" align="center" color="#facc15" width="3.5" scale="0.32 0.32 0.32" wrap-count="55"></a-text>
+                                    position="0 -0.5 0.02" align="center" color="#facc15" width="3.5" scale="0.80 0.80 0.80" wrap-count="55"></a-text>
                             )}
                         </a-entity>
                     )}
@@ -386,7 +434,7 @@ export default function RakshaExpertRoom1({ onInteractTerminal }) {
 
             {/* === GERBANG KELUAR (terkunci sampai Tahap 3) === */}
             <a-entity position="0 0 -9">
-                <a-box class="solid" position="0 2 0" width="4" height="4" depth="0.2" color="#1e293b"></a-box>
+                <a-box class="solid" position="0 2 0" width="15" height="9f" depth="0.2" color="#1e293b"></a-box>
                 <a-plane position="0 1.5 0.11" width="3.6" height="3" color="#334155"></a-plane>
                 <a-text value={stage === 3 ? "AKSES DIIZINKAN" : "AKSES TERKUNCI"} position="0 3.3 0.12" align="center"
                     color={stage === 3 ? "#4ade80" : "#ef4444"} scale="0.6 0.6 0.6"></a-text>
