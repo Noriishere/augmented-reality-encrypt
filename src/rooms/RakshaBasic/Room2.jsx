@@ -244,8 +244,8 @@ export default function Room2({ onBackToCorridor, onBackToMainMenu, hasPaper = f
             <a-entity position="-0.4 -0.3 -0.5" rotation="-15 20 0">
                 <a-plane width="0.3" height="0.4"
                     material="src: #tex-paper-note; roughness: 0.8; side: double"></a-plane>
-                <a-text value="RAHASIA:" position="0 0.12 0.01" align="center" color="#333" scale="0.08 0.08 0.08" font="mozillavr"></a-text>
-                <a-text value="Kode: ouwo" position="0 0.02 0.01" align="center" color="#c00" scale="0.1 0.1 0.1" font="mozillavr"></a-text>
+                <a-text value="" position="0 0.12 0.01" align="center" color="#333" scale="0.08 0.08 0.08" font="mozillavr"></a-text>
+                <a-text value="" position="0 0.02 0.01" align="center" color="#c00" scale="0.1 0.1 0.1" font="mozillavr"></a-text>
             </a-entity>
         `;
 

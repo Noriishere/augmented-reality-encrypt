@@ -1,41 +1,41 @@
-name: Deploy React App to VPS
+# name: Deploy React App to VPS
 
-# Pemicu: Jalankan skrip ini setiap ada 'push' ke branch 'main'
-on:
-  push:
-    branches:
-      - main
+# # Pemicu: Jalankan skrip ini setiap ada 'push' ke branch 'main'
+# on:
+#   push:
+#     branches:
+#       - main
 
-jobs:
-  build-and-deploy:
-    runs-on: ubuntu-latest
+# jobs:
+#   build-and-deploy:
+#     runs-on: ubuntu-latest
 
-    steps:
-    # 1. Ambil kode terbaru dari repository
-    - name: Checkout Code
-      uses: actions/checkout@v4
+#     steps:
+#     # 1. Ambil kode terbaru dari repository
+#     - name: Checkout Code
+#       uses: actions/checkout@v4
 
-    # 2. Setup Node.js di server GitHub
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: 24 # Sesuikan dengan versi Node kamu
-        cache: 'npm'
+#     # 2. Setup Node.js di server GitHub
+#     - name: Setup Node.js
+#       uses: actions/setup-node@v4
+#       with:
+#         node-version: 24 # Sesuikan dengan versi Node kamu
+#         cache: 'npm'
 
-    # 3. Install dependencies dan build project React (Vite)
-    - name: Install and Build
-      run: |
-        npm install
-        npm run build
+#     # 3. Install dependencies dan build project React (Vite)
+#     - name: Install and Build
+#       run: |
+#         npm install
+#         npm run build
 
-    # 4. Unggah folder hasil build (dist) ke VPS menggunakan SFTP
-    - name: Deploy to VPS via SFTP
-      uses: appleboy/scp-action@v0.1.7
-      with:
-        host: ${{ secrets.SSH_HOST }}
-        username: ${{ secrets.SSH_USER }}
-        key: ${{ secrets.SSH_KEY }}
-        port: 22 # Port SSH standar VPS kamu
-        source: "dist/*" # Jika pakai Vite, hasilnya ada di folder dist. Jika CRA, ganti jadi "build/*"
-        target: "/www/wwwroot/arencrypt.naltylabs.my.id"
-        strip_components: 1 # Menghilangkan folder 'dist' agar isinya langsung masuk ke target
+#     # 4. Unggah folder hasil build (dist) ke VPS menggunakan SFTP
+#     - name: Deploy to VPS via SFTP
+#       uses: appleboy/scp-action@v0.1.7
+#       with:
+#         host: ${{ secrets.SSH_HOST }}
+#         username: ${{ secrets.SSH_USER }}
+#         key: ${{ secrets.SSH_KEY }}
+#         port: 22 # Port SSH standar VPS kamu
+#         source: "dist/*" # Jika pakai Vite, hasilnya ada di folder dist. Jika CRA, ganti jadi "build/*"
+#         target: "/www/wwwroot/arencrypt.naltylabs.my.id"
+#         strip_components: 1 # Menghilangkan folder 'dist' agar isinya langsung masuk ke target

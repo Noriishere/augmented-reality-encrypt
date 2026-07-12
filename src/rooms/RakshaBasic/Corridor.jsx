@@ -39,8 +39,7 @@ function Locker({ position, rotation = "0 0 0", containsPaper = false, playerHas
     };
 
     // Kertas cuma tampil kalau: locker ini memang berisi kertas, pintunya terbuka,
-    // DAN player belum pegang kertasnya (biar gak duplikat kalau dibuka lagi)
-    const showPaper = containsPaper && isOpen && !playerHasPaper;
+    const showPaper = containsPaper && !playerHasPaper;
 
     return (
         <a-entity position={position} rotation={rotation}>

@@ -7,7 +7,10 @@ import RakshaBasicRoom1 from './rooms/RakshaBasic/Room1';
 import RakshaBasicCorridor from './rooms/RakshaBasic/Corridor';
 import RakshaBasicRoom2 from './rooms/RakshaBasic/Room2';
 import RakshaExpertRoom1 from './rooms/RakshaExpert/Room1';
-
+import LoadingScreen from './components/LoadingScreen';
+import RoomWelcomeHUD from './components/RoomWelcomeHUD';
+import { resolveRoomIntro } from './components/roomIntros';
+import { useRoomWelcomeVRTexture } from './components/UseRoomWelcomeVrTexture';
 /* ============================================================
    Canvas HUD — close to player, glitch working, clickable
    ============================================================ */
@@ -262,6 +265,11 @@ function App() {
   const sceneRef = useRef(null);
   const vrHudTexture = useCanvasHUD({ currentRoom, isVRMode });
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [isAppLoading, setIsAppLoading] = useState(true);
+  const [roomStage, setRoomStage] = useState('room1');
+  const [roomWelcome, setRoomWelcome] = useState(null);
+  const welcomeVRTexture = useRoomWelcomeVRTexture({ isVRMode, welcome: roomWelcome });
+  const dismissWelcome = () => setRoomWelcome(null);
 
   // MENGGUNAKAN SATU STATE UNTUK SEMUA KONFIGURASI KEYBOARD
   const [keyboardConfig, setKeyboardConfig] = useState({
@@ -302,9 +310,29 @@ function App() {
               look.pitchObject.rotation.x = 0;
             }
           }
+        
+      } else if (roomName === 'Raksha Expert') {
+        setRoomStage('room1');
+
+        playerRig.object3D.position.set(0, 0, 4);
+        playerRig.object3D.rotation.set(0, 0, 0);
+
+        const cameraEl = playerRig.querySelector('a-camera');
+        if (cameraEl) {
+          // 2. Reset sisa pergerakan (momentum) dari LOBBY agar kamu tidak meluncur nabrak tembok
+          if (cameraEl.components['free-move']) {
+            cameraEl.components['free-move'].velocity = { x: 0, z: 0 };
+          }
+
+          cameraEl.object3D.rotation.set(0, 0, 0);
+          const look = cameraEl.components["look-controls"];
+          if (look) {
+            look.yawObject.rotation.y = 0;
+            look.pitchObject.rotation.x = 0;
+          }
         }
       }
-
+    }
       setTimeout(() => {
         setIsTransitioning(false);
         sceneRef.current?.emit('refresh-solids');
@@ -331,6 +359,13 @@ function App() {
     };
   }, []);
 
+  useEffect(() => {
+    if (isTransitioning) return;
+    if (currentRoom === 'LOBBY') { setRoomWelcome(null); return; }
+    const intro = resolveRoomIntro(currentRoom, roomStage);
+    if (intro) setRoomWelcome({ ...intro, visible: true });
+  }, [currentRoom, roomStage, isTransitioning]);
+
   const toggleFullScreen = () => {
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen().catch(err => console.error(err));
@@ -338,8 +373,6 @@ function App() {
       document.exitFullscreen();
     }
   };
-
-  const [roomStage, setRoomStage] = useState('room1');
 
   const ROOM_ANSWERS = {
     'room1-exit': 'OUWI',
@@ -441,7 +474,13 @@ function App() {
 
   return (
     <div className="relative w-full h-screen overflow-hidden bg-black">
-
+      {isAppLoading && (
+        <LoadingScreen
+          sceneRef={sceneRef}
+          assetTimeout={15000}
+          onComplete={() => setIsAppLoading(false)}
+        />
+      )}
       {!isVRMode && (
         <HUD
           currentRoom={currentRoom}
@@ -451,9 +490,18 @@ function App() {
           onToggleFullscreen={toggleFullScreen}
         />
       )}
+      {!isVRMode && roomWelcome?.visible && (
+        <RoomWelcomeHUD
+          title={roomWelcome.title}
+          subtitle={roomWelcome.subtitle}
+          caseText={roomWelcome.caseText}
+          onStart={dismissWelcome}
+        />
+      )}
 
       <a-scene ref={sceneRef} embedded style={{ width: '100%', height: '100%' }}>
         <a-assets timeout="15000">
+          <a-asset-item id="model-key-pub" src="/assets/key_card.glb"></a-asset-item>
           <img id="tex-dc-floor" src="/assets/dc_floor.png" crossOrigin="anonymous" />
           <img id="tex-dc-wall" src="/assets/dc_wall.png" crossOrigin="anonymous" />
           <img id="tex-dc-ceiling" src="/assets/dc_ceiling.png" crossOrigin="anonymous" />
@@ -555,12 +603,21 @@ function App() {
         {currentRoom !== 'LOBBY' && (
           <a-sky color="#0a0e14"></a-sky>
         )}
-        {currentRoom === 'Raksha Expert' && (
-          <RakshaExpertRoom1 onInteractTerminal={handleVRTerminalClick} />
+        {currentRoom === 'Raksha Expert' && roomStage === 'room1' && (
+          <RakshaExpertRoom1
+            onInteractTerminal={() => {
+              setCurrentRoom('LOBBY');
+              setRoomStage('room1');
+
+              const playerRig = document.getElementById('rig');
+              if (playerRig) {
+                playerRig.object3D.position.set(0, 0, 0);
+                playerRig.object3D.rotation.set(0, 0, 0);
+              }
+            }}
+          />
         )}
-        {/* =======================================================
-            POSISI KEYBOARD SEKARANG DINAMIS MENGIKUTI KONFIGURASI
-            ======================================================= */}
+
         {showKeyboard && (
           <VirtualKeyboard
             position={keyboardConfig.position}
@@ -580,6 +637,9 @@ function App() {
           currentInput={pin}
           handleVirtualKeyPress={handleVirtualKeyPress}
           isTransitioning={isTransitioning}
+          welcomeTexture={welcomeVRTexture}
+          onDismissWelcome={dismissWelcome}
+          isWelcomeOpen={!!roomWelcome?.visible}
         />
       </a-scene>
     </div>
