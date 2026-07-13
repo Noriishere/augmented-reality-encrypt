@@ -11,6 +11,7 @@ import LoadingScreen from './components/LoadingScreen';
 import RoomWelcomeHUD from './components/RoomWelcomeHUD';
 import { resolveRoomIntro } from './components/roomIntros';
 import { useRoomWelcomeVRTexture } from './components/UseRoomWelcomeVrTexture';
+import LandingPage from './components/LandingPage';
 /* ============================================================
    Canvas HUD — close to player, glitch working, clickable
    ============================================================ */
@@ -268,6 +269,7 @@ function App() {
   const [isAppLoading, setIsAppLoading] = useState(true);
   const [roomStage, setRoomStage] = useState('room1');
   const [roomWelcome, setRoomWelcome] = useState(null);
+  const [hasStarted, setHasStarted] = useState(false);
   const welcomeVRTexture = useRoomWelcomeVRTexture({ isVRMode, welcome: roomWelcome });
   const dismissWelcome = () => setRoomWelcome(null);
 
@@ -310,35 +312,36 @@ function App() {
               look.pitchObject.rotation.x = 0;
             }
           }
-        
-      } else if (roomName === 'Raksha Expert') {
-        setRoomStage('room1');
 
-        playerRig.object3D.position.set(0, 0, 4);
-        playerRig.object3D.rotation.set(0, 0, 0);
+        } else if (roomName === 'Raksha Expert') {
+          setRoomStage('room1');
 
-        const cameraEl = playerRig.querySelector('a-camera');
-        if (cameraEl) {
-          // 2. Reset sisa pergerakan (momentum) dari LOBBY agar kamu tidak meluncur nabrak tembok
-          if (cameraEl.components['free-move']) {
-            cameraEl.components['free-move'].velocity = { x: 0, z: 0 };
-          }
+          playerRig.object3D.position.set(0, 0, 4);
+          playerRig.object3D.rotation.set(0, 0, 0);
 
-          cameraEl.object3D.rotation.set(0, 0, 0);
-          const look = cameraEl.components["look-controls"];
-          if (look) {
-            look.yawObject.rotation.y = 0;
-            look.pitchObject.rotation.x = 0;
+          const cameraEl = playerRig.querySelector('a-camera');
+          if (cameraEl) {
+            // 2. Reset sisa pergerakan (momentum) dari LOBBY agar kamu tidak meluncur nabrak tembok
+            if (cameraEl.components['free-move']) {
+              cameraEl.components['free-move'].velocity = { x: 0, z: 0 };
+            }
+
+            cameraEl.object3D.rotation.set(0, 0, 0);
+            const look = cameraEl.components["look-controls"];
+            if (look) {
+              look.yawObject.rotation.y = 0;
+              look.pitchObject.rotation.x = 0;
+            }
           }
         }
       }
-    }
       setTimeout(() => {
         setIsTransitioning(false);
         sceneRef.current?.emit('refresh-solids');
       }, 100);
     }, 800);
   };
+
 
   useEffect(() => {
     const sceneEl = sceneRef.current;
@@ -409,6 +412,28 @@ function App() {
     if (pin.length < 6) setPin(prev => prev + key);
   };
 
+  const handleVRTerminalClick = useCallback(() => {
+    setShowKeyboard(prev => !prev);
+  }, []);
+
+  useEffect(() => {
+    const handler = (e) => {
+      if (e.detail && e.detail.context) {
+        setKeyboardConfig({
+          context: e.detail.context,
+          position: e.detail.position || '0 1.4 -10.8',
+          rotation: e.detail.rotation || '-10 0 0'
+        });
+        setShowKeyboard(true);
+      }
+    };
+    window.addEventListener('open-keyboard', handler);
+    return () => window.removeEventListener('open-keyboard', handler);
+  }, []);
+
+  if (!hasStarted) {
+    return <LandingPage onStart={() => setHasStarted(true)} />;
+  }
   const goToRoom2 = () => {
     setIsTransitioning(true);
     setTimeout(() => {
@@ -452,26 +477,6 @@ function App() {
     }, 800);
   };
 
-  const handleVRTerminalClick = useCallback(() => {
-    setShowKeyboard(prev => !prev);
-  }, []);
-
-  // Event listener untuk open-keyboard kini menangkap data posisi dari custom event
-  useEffect(() => {
-    const handler = (e) => {
-      if (e.detail && e.detail.context) {
-        setKeyboardConfig({
-          context: e.detail.context,
-          position: e.detail.position || '0 1.4 -10.8', // Fallback default
-          rotation: e.detail.rotation || '-10 0 0'
-        });
-        setShowKeyboard(true);
-      }
-    };
-    window.addEventListener('open-keyboard', handler);
-    return () => window.removeEventListener('open-keyboard', handler);
-  }, []);
-
   return (
     <div className="relative w-full h-screen overflow-hidden bg-black">
       {isAppLoading && (
@@ -501,6 +506,7 @@ function App() {
 
       <a-scene ref={sceneRef} embedded style={{ width: '100%', height: '100%' }}>
         <a-assets timeout="15000">
+          <a-asset-item id="model-hacker" src="/assets/hooded_hacker.glb"></a-asset-item>
           <a-asset-item id="model-key-pub" src="/assets/key_card.glb"></a-asset-item>
           <img id="tex-dc-floor" src="/assets/dc_floor.png" crossOrigin="anonymous" />
           <img id="tex-dc-wall" src="/assets/dc_wall.png" crossOrigin="anonymous" />

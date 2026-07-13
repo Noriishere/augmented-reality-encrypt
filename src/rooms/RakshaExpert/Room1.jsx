@@ -170,7 +170,6 @@ export default function RakshaExpertRoom1({ onInteractTerminal }) {
     const triggerLockdown = () => {
         if (feedback || !allActive) return;
         handleAnswer(true, 3, "");
-        setPillars({ ne: false, se: false, sw: false, nw: false });
     };
 
     return (
@@ -260,7 +259,30 @@ export default function RakshaExpertRoom1({ onInteractTerminal }) {
                                 color={allActive ? "#4ade80" : "#f87171"} scale="0.42 0.42 0.42"></a-text>
                             <a-text value={`Pilar aktif: ${activeCount}/4`} position="0 0.05 0.02" align="center"
                                 color="#94a3b8" scale="0.80 0.80 0.80"></a-text>
+                            {/* === HACKER BAYANGAN — muncul di kanan (dekat pilar SE), menakut-nakuti === */}
+                            <a-entity position={`${PILLAR_RADIUS + 2.1} -3 ${PILLAR_RADIUS + 1.5}`} rotation="0 10 0">
+                                <a-gltf-model
+                                    src="#model-hacker"
+                                    scale="0.003 0.003 0.003"
+                                    position="0 0 0"
+                                    animation__breathe="property: position; to: 0 0.08 0; dir: alternate; loop: true; dur: 2200; easing: easeInOutSine"
+                                ></a-gltf-model>
 
+                                {/* Siluet merah redup di belakangnya biar makin ngeri */}
+                                <a-light type="point" color="#dc2626" intensity="0.6" distance="3" position="0 1.5 0.5"
+                                    animation__flicker="property: intensity; from: 0.3; to: 0.8; dur: 300; loop: true; dir: alternate"></a-light>
+
+                                {/* Mata/hologram menyala — opsional, hapus kalau modelnya udah ada wajah/mata sendiri */}
+                                <a-sphere position="0.08 1.65 0.35" radius="0.02" color="#ef4444"
+                                    material="emissive: #ef4444; emissiveIntensity: 3"></a-sphere>
+                                <a-sphere position="-0.08 1.65 0.35" radius="0.02" color="#ef4444"
+                                    material="emissive: #ef4444; emissiveIntensity: 3"></a-sphere>
+
+                                {/* Teks peringatan mengambang di atas kepala hacker */}
+                                <a-text value="[ PERETAS TERDETEKSI ]" position="0 2.3 0" align="center"
+                                    color="#ef4444" scale="0.5 0.5 0.5"
+                                    animation="property: opacity; from: 1; to: 0.2; dur: 500; loop: true; dir: alternate"></a-text>
+                            </a-entity>
                             {allActive ? (
                                 <a-entity position="0 -0.5 0.02">
                                     <a-box width="2" height="0.4" depth="0.05" color="#16a34a" class="clickable"
@@ -274,6 +296,7 @@ export default function RakshaExpertRoom1({ onInteractTerminal }) {
                                     position="0 -0.5 0.02" align="center" color="#facc15" width="3.5" scale="0.80 0.80 0.80" wrap-count="55"></a-text>
                             )}
                         </a-entity>
+
                     )}
 
                     {/* --- TAHAP 3: REFLEKSI (CLEAR) --- */}
@@ -302,7 +325,7 @@ export default function RakshaExpertRoom1({ onInteractTerminal }) {
                     <a-entity position={PEDESTAL_POS.public}>
                         <a-cylinder class="solid" radius="0.35" height="1.1" position="0 -0.55 0" color="#0c4a6e"></a-cylinder>
                         {!handshakeFx && (
-                            
+
                             <a-gltf-model class="clickable" src="#model-key-pub" scale={KEY_SCALE} position="0 0.6 0"
                                 onClick={() => pickPedestal('public')}
                                 animation__hover={`property: scale; to: ${KEY_SCALE_HOVER}; startEvents: mouseenter; dur: 200`}
