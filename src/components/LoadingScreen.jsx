@@ -1,28 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 
-/* ============================================================
-   LoadingScreen — RAKHSHDATA boot sequence
-   ------------------------------------------------------------
-   Tracks the REAL loading of every child inside <a-assets>,
-   not a fake timer. Two most likely causes of the previous
-   "crash" (a stuck black screen that never proceeds):
-
-   1. Listening for a `loaded` event on plain <img> tags.
-      A-Frame's own <a-assets> loader knows to listen for the
-      native `load` event on <img>, but `loaded` (A-Frame's
-      custom event) is only fired by <a-asset-item> and
-      entities — so a counter waiting on the wrong event name
-      for images would sit at 0% forever.
-   2. No hard timeout, so a single failed/slow texture (404,
-      slow network, etc.) could hang the whole screen with no
-      way out.
-
-   This version listens to the correct event per tag type,
-   counts every asset off individually (with per-item boot-log
-   feedback), and always has a safety timeout + manual skip
-   button so it can never get stuck again.
-   ============================================================ */
-
 function friendlyName(id) {
   if (!id) return 'UNKNOWN MODULE';
   const prefix = id.startsWith('model-')

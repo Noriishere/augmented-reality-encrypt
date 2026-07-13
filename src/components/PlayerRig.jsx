@@ -165,15 +165,11 @@ export default function PlayerRig({
   currentInput,
   handleVirtualKeyPress,
   isTransitioning,
-  // 3. Props baru untuk welcome/case card di VR
-  welcomeTexture,
-  onDismissWelcome,
   isWelcomeOpen
 }) {
   const hudRef = useRef(null);
   const terminalRef = useRef(null);
   const circleRef = useRef(null);
-  const welcomeRef = useRef(null);
   useEffect(() => {
     let id;
 
@@ -218,14 +214,6 @@ YAW : ${THREE.MathUtils.radToDeg(r.y).toFixed(1)}`
     }
   }, [vrHudTexture]);
 
-  // 4. Tempel welcome/case texture ke plane-nya, sama seperti hudRef di atas
-  useEffect(() => {
-    if (welcomeRef.current && welcomeTexture) {
-      const mesh = welcomeRef.current.getObject3D('mesh');
-      if (mesh) { mesh.material.map = welcomeTexture; mesh.material.needsUpdate = true; }
-    }
-  }, [welcomeTexture]);
-
   useEffect(() => {
     if (!terminalRef.current || !isVRMode) return;
     const el = terminalRef.current;
@@ -235,15 +223,6 @@ YAW : ${THREE.MathUtils.radToDeg(r.y).toFixed(1)}`
     return () => { el.removeEventListener('click', handleClick); el.removeEventListener('mousedown', handleClick); };
   }, [isVRMode, onVRTerminalClick]);
 
-  // 5. Klik/laser pada panel welcome -> dismiss, sama pola dengan terminalRef
-  useEffect(() => {
-    if (!welcomeRef.current || !isVRMode || !welcomeTexture) return;
-    const el = welcomeRef.current;
-    const handleClick = (e) => { e.stopPropagation(); if (onDismissWelcome) onDismissWelcome(); };
-    el.addEventListener('click', handleClick);
-    el.addEventListener('mousedown', handleClick);
-    return () => { el.removeEventListener('click', handleClick); el.removeEventListener('mousedown', handleClick); };
-  }, [isVRMode, onDismissWelcome, welcomeTexture]);
 
   return (
     <a-entity id="rig" position="0 0 0">
@@ -276,13 +255,6 @@ YAW : ${THREE.MathUtils.radToDeg(r.y).toFixed(1)}`
         {isVRMode && (
           <a-entity position="0 0.15 -0.7">
             <a-plane ref={hudRef} width="2.2" height="1.1"
-              material="shader: flat; transparent: true; side: double; alphaTest: 0.01"></a-plane>
-          </a-entity>
-        )}
-        {/* 6. Panel welcome/case — hanya tampil saat ada level intro aktif di VR */}
-        {isVRMode && welcomeTexture && (
-          <a-entity position="0 0 -1.3">
-            <a-plane ref={welcomeRef} className="clickable" width="2" height="1.15"
               material="shader: flat; transparent: true; side: double; alphaTest: 0.01"></a-plane>
           </a-entity>
         )}

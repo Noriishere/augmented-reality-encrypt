@@ -156,7 +156,7 @@ export default function MainMenu({ onSelectRoom }) {
                 <a-text value="RAKSHA BASIC" position="0 3.55 0.17" align="center" color="#ffffff" scale="0.85 0.85 0.85"></a-text>
                 <a-text value="Elementary Level" position="0 3.3 0.17" align="center" color="#bbf7d0" scale="0.35 0.35 0.35"></a-text>
             </a-entity>
-            <KeypadPanel position="-7.0 1.1 1.5" rotation="0 90 0" onClick={() => onSelectRoom('Raksha Basic')} />
+            <KeypadPanel position="-7.4 1.5 1.5" rotation="0 90 0" onClick={() => onSelectRoom('Raksha Basic')} />
             {/* Server putih samping keypad kiri */}
             <a-box class="solid" position="-6.8 1 -2.2" width="0.7" height="1.8" depth="1" color="#e8ecf0" material="roughness: 0.4; metalness: 0.3"></a-box>
             <a-plane position="-6.44 1 -2.2" rotation="0 90 0" width="0.95" height="1.7"
@@ -171,7 +171,7 @@ export default function MainMenu({ onSelectRoom }) {
                 <a-text value="RAKSHA BEGINNER" position="0 3.55 0.17" align="center" color="#ffffff" scale="0.8 0.8 0.8"></a-text>
                 <a-text value="Intermediate Level" position="0 3.3 0.17" align="center" color="#fef08a" scale="0.35 0.35 0.35"></a-text>
             </a-entity>
-            <KeypadPanel position="1.5 1.1 7.0" rotation="0 180 0" onClick={() => onSelectRoom('Raksha Beginner')} />
+            <KeypadPanel position="1.5 1.5 7.2" rotation="0 180 0" onClick={() => onSelectRoom('Raksha Beginner')} />
             {/* Server putih samping keypad depan */}
             <a-box class="solid" position="-2.2 1 6.8" width="1" height="1.8" depth="0.7" color="#e8ecf0" material="roughness: 0.4; metalness: 0.3"></a-box>
             <a-plane position="-2.2 1 6.44" rotation="0 180 0" width="0.95" height="1.7"
@@ -186,7 +186,7 @@ export default function MainMenu({ onSelectRoom }) {
                 <a-text value="RAKSHA EXPERT" position="0 3.55 0.17" align="center" color="#ffffff" scale="0.8 0.8 0.8"></a-text>
                 <a-text value="Advanced Level" position="0 3.3 0.17" align="center" color="#fef08a" scale="0.6 0.6 0.6"></a-text>
             </a-entity>
-            <KeypadPanel position="7.0 1.1 -1.5" rotation="0 -90 0" onClick={() => onSelectRoom('Raksha Expert')} />
+            <KeypadPanel position="7.2 1.5 -1.5" rotation="0 -90 0" onClick={() => onSelectRoom('Raksha Expert')} />
             {/* Server putih samping keypad kanan */}
             <a-box class="solid" position="6.8 1 2.2" width="0.7" height="1.8" depth="1" color="#e8ecf0" material="roughness: 0.4; metalness: 0.3"></a-box>
             <a-plane position="6.44 1 2.2" rotation="0 -90 0" width="0.95" height="1.7"

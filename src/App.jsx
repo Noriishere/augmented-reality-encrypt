@@ -10,7 +10,6 @@ import RakshaExpertRoom1 from './rooms/RakshaExpert/Room1';
 import LoadingScreen from './components/LoadingScreen';
 import RoomWelcomeHUD from './components/RoomWelcomeHUD';
 import { resolveRoomIntro } from './components/roomIntros';
-import { useRoomWelcomeVRTexture } from './components/UseRoomWelcomeVrTexture';
 import LandingPage from './components/LandingPage';
 /* ============================================================
    Canvas HUD — close to player, glitch working, clickable
@@ -200,9 +199,6 @@ function useCanvasHUD({ currentRoom, isVRMode }) {
       ctx.fillStyle = isGlitch ? '#ef4444' : '#06b6d4';
       ctx.fillText(isGlitch ? glitchStr('99999', 0.6) : '142 pkts/s', stx + 130, sty + 185);
 
-      // ==============================
-      // BOTTOM CENTER — Terminal button
-      // ==============================
       const bx = w / 2 - 380, by = h - 200;
       ctx.fillStyle = 'rgba(0,0,0,0.45)';
       ctx.fillRect(bx, by, 760, 100);
@@ -270,7 +266,6 @@ function App() {
   const [roomStage, setRoomStage] = useState('room1');
   const [roomWelcome, setRoomWelcome] = useState(null);
   const [hasStarted, setHasStarted] = useState(false);
-  const welcomeVRTexture = useRoomWelcomeVRTexture({ isVRMode, welcome: roomWelcome });
   const dismissWelcome = () => setRoomWelcome(null);
 
   // MENGGUNAKAN SATU STATE UNTUK SEMUA KONFIGURASI KEYBOARD
@@ -347,7 +342,10 @@ function App() {
     const sceneEl = sceneRef.current;
     if (!sceneEl) return;
 
-    const handleEnterVR = () => setIsVRMode(true);
+    const handleEnterVR = () => {
+      setIsVRMode(true);
+      setRoomWelcome(null);
+    };
     const handleExitVR = () => setIsVRMode(false);
     const handleFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement);
 
@@ -365,10 +363,13 @@ function App() {
   useEffect(() => {
     if (isTransitioning) return;
     if (currentRoom === 'LOBBY') { setRoomWelcome(null); return; }
+
+    const sceneIsVR = sceneRef.current?.is?.('vr-mode');
+    if (isVRMode || sceneIsVR) return;
+
     const intro = resolveRoomIntro(currentRoom, roomStage);
     if (intro) setRoomWelcome({ ...intro, visible: true });
   }, [currentRoom, roomStage, isTransitioning]);
-
   const toggleFullScreen = () => {
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen().catch(err => console.error(err));
@@ -643,8 +644,6 @@ function App() {
           currentInput={pin}
           handleVirtualKeyPress={handleVirtualKeyPress}
           isTransitioning={isTransitioning}
-          welcomeTexture={welcomeVRTexture}
-          onDismissWelcome={dismissWelcome}
           isWelcomeOpen={!!roomWelcome?.visible}
         />
       </a-scene>

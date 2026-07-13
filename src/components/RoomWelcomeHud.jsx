@@ -8,11 +8,6 @@ function glitchStr(text, intensity = 0.15) {
     .join('');
 }
 
-/**
- * RoomWelcomeHUD — kartu "welcome + kasus" untuk desktop/mobile.
- * Muncul begitu roomWelcome di App.jsx bernilai visible=true.
- * Dismiss lewat tombol MULAI atau tombol Enter/Space (desktop).
- */
 export default function RoomWelcomeHUD({ title, subtitle, caseText, onStart }) {
   const [glitch, setGlitch] = useState(false);
   const [mounted, setMounted] = useState(false);
