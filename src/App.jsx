@@ -7,6 +7,7 @@ import RakshaBasicRoom1 from './rooms/RakshaBasic/Room1';
 import RakshaBasicCorridor from './rooms/RakshaBasic/Corridor';
 import RakshaBasicRoom2 from './rooms/RakshaBasic/Room2';
 import RakshaExpertRoom1 from './rooms/RakshaExpert/Room1';
+import RakshaBeginnerRoom from './rooms/RakshaBeginner/Room1';
 import LoadingScreen from './components/LoadingScreen';
 import RoomWelcomeHUD from './components/RoomWelcomeHUD';
 import { resolveRoomIntro } from './components/roomIntros';
@@ -316,13 +317,22 @@ function App() {
 
           const cameraEl = playerRig.querySelector('a-camera');
           if (cameraEl) {
-            // 2. Reset sisa pergerakan (momentum) dari LOBBY agar kamu tidak meluncur nabrak tembok
             if (cameraEl.components['free-move']) {
               cameraEl.components['free-move'].velocity = { x: 0, z: 0 };
             }
 
             cameraEl.object3D.rotation.set(0, 0, 0);
             const look = cameraEl.components["look-controls"];
+            if (look) {
+              look.yawObject.rotation.y = 0;
+              look.pitchObject.rotation.x = 0;
+            }
+          }
+        } else if (roomName === 'Raksha Beginner') {
+          playerRig.object3D.position.set(3.50, 0, 3.50);
+          if (camera) {
+            const look = camera.components["look-controls"];
+            camera.object3D.rotation.set(0, 0, 0);
             if (look) {
               look.yawObject.rotation.y = 0;
               look.pitchObject.rotation.x = 0;
@@ -381,7 +391,11 @@ function App() {
   const ROOM_ANSWERS = {
     'room1-exit': 'OUWI',
     'room2-enter': 'OUWO',
-    'room2-self-exit': 'OUWI', // <-- Tambahkan baris ini
+    'room2-self-exit': 'OUWI',
+    'beginner-pc': 'AWAL',
+    'beginner-safe': 'PETI',
+    'beginner-door': 'BUKA',
+    'beginner-system': 'AMAN'
   };
 
   const handleVirtualKeyPress = (key) => {
@@ -624,6 +638,25 @@ function App() {
             }}
           />
         )}
+        {currentRoom !== 'LOBBY' && (
+          <a-sky color="#0a0e14"></a-sky>
+        )}
+
+        {currentRoom === 'Raksha Beginner' && roomStage === 'room1' && (
+          <RakshaBeginnerRoom
+            onInteractTerminal={() => {
+              setCurrentRoom('LOBBY');
+              setRoomStage('room1');
+
+              const playerRig = document.getElementById('rig');
+              if (playerRig) {
+                playerRig.object3D.position.set(0, 0, 0);
+                playerRig.object3D.rotation.set(0, 0, 0);
+              }
+            }}
+          />
+        )}
+
 
         {showKeyboard && (
           <VirtualKeyboard
