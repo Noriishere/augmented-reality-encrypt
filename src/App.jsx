@@ -12,6 +12,8 @@ import LoadingScreen from './components/LoadingScreen';
 import RoomWelcomeHUD from './components/RoomWelcomeHUD';
 import { resolveRoomIntro } from './components/roomIntros';
 import LandingPage from './components/LandingPage';
+import RakshaExpertCorridor from './rooms/RakshaExpert/Corridor';
+
 /* ============================================================
    Canvas HUD — close to player, glitch working, clickable
    ============================================================ */
@@ -464,7 +466,30 @@ function App() {
       }, 100);
     }, 800);
   };
-
+  const goToExpertCorridor = () => {
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setRoomStage('corridor');
+      const playerRig = document.getElementById('rig');
+      if (playerRig) {
+        playerRig.object3D.position.set(0, 0, 0);
+        playerRig.object3D.rotation.set(0, 0, 0);
+        const camera = playerRig.querySelector('a-camera');
+        if (camera) {
+          camera.object3D.rotation.set(0, 0, 0);
+          const look = camera.components['look-controls'];
+          if (look) {
+            look.yawObject.rotation.y = 0;
+            look.pitchObject.rotation.x = 0;
+          }
+        }
+      }
+      setTimeout(() => {
+        setIsTransitioning(false);
+        sceneRef.current?.emit('refresh-solids');
+      }, 100);
+    }, 800);
+  };
   const goToCorridor = () => {
     setIsTransitioning(true);
     setTimeout(() => {
@@ -626,7 +651,13 @@ function App() {
         )}
         {currentRoom === 'Raksha Expert' && roomStage === 'room1' && (
           <RakshaExpertRoom1
-            onInteractTerminal={() => {
+            onEnterCorridor={goToExpertCorridor}
+          />
+        )}
+
+        {currentRoom === 'Raksha Expert' && roomStage === 'corridor' && (
+          <RakshaExpertCorridor
+            onExitToLobby={() => {
               setCurrentRoom('LOBBY');
               setRoomStage('room1');
 
