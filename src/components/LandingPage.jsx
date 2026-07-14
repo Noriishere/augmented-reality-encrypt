@@ -26,7 +26,7 @@ export default function LandingPage({ onStart }) {
       {/* Kotak Konten Utama */}
       <div className="z-10 flex flex-col items-center p-10 bg-black/60 border-2 border-cyan-500 shadow-[0_0_30px_rgba(6,182,212,0.3)] backdrop-blur-md rounded-xl text-center">
         <h1 className="text-5xl md:text-7xl font-bold text-cyan-400 tracking-widest mb-2 drop-shadow-[0_0_10px_rgba(34,211,238,0.8)] animate-pulse">
-          RAKHSHDATA
+          RAKSHADATA
         </h1>
         <p className="text-slate-400 text-lg md:text-xl mb-10 tracking-widest">
           CYBER DEFENSE TRAINING SIMULATOR

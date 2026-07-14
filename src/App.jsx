@@ -13,7 +13,6 @@ import RoomWelcomeHUD from './components/RoomWelcomeHUD';
 import { resolveRoomIntro } from './components/roomIntros';
 import LandingPage from './components/LandingPage';
 import RakshaExpertCorridor from './rooms/RakshaExpert/Corridor';
-
 /* ============================================================
    Canvas HUD — close to player, glitch working, clickable
    ============================================================ */
@@ -270,7 +269,7 @@ function App() {
   const [roomWelcome, setRoomWelcome] = useState(null);
   const [hasStarted, setHasStarted] = useState(false);
   const dismissWelcome = () => setRoomWelcome(null);
-
+  const [mistakes, setMistakes] = useState(0);
   // MENGGUNAKAN SATU STATE UNTUK SEMUA KONFIGURASI KEYBOARD
   const [keyboardConfig, setKeyboardConfig] = useState({
     context: '',

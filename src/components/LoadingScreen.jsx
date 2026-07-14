@@ -186,7 +186,7 @@ export default function LoadingScreen({ sceneRef, assetTimeout = 15000, onComple
               className="text-xl md:text-2xl font-black text-cyan-400 tracking-[0.25em]"
               style={{ textShadow: '0 0 18px rgba(34,211,238,0.5)' }}
             >
-              RAKHSHDATA
+              RAKSHADATA
             </h1>
             <div className="text-[10px] text-cyan-600 tracking-[0.2em]">INITIALIZING SECURE ENVIRONMENT</div>
           </div>

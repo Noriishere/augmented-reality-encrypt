@@ -107,7 +107,7 @@ export default function HUD({
                             <div>
                                 <h1 className="text-2xl md:text-3xl font-black text-cyan-400 tracking-[0.3em] font-mono"
                                     style={{ textShadow: '0 0 20px rgba(34,211,238,0.5)' }}>
-                                    {statsGlitch ? glitchStr('RAKHSHDATA', 0.3) : 'RAKHSHDATA'}
+                                    {statsGlitch ? glitchStr('RAKSHADATA', 0.3) : 'RAKSHADATA'}
                                 </h1>
                                 <div className="text-[10px] text-cyan-600 font-mono tracking-[0.2em]">CYBER DEFENSE TRAINING v2.4.1</div>
                             </div>
