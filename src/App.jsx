@@ -14,6 +14,7 @@ import { resolveRoomIntro } from './components/roomIntros';
 import LandingPage from './components/LandingPage';
 import RakshaExpertCorridor from './rooms/RakshaExpert/Corridor';
 import EvaluationRoom from './rooms/EvaluationRoom';
+import { useRoomWelcomeVRTexture } from './components/UseRoomWelcomeVrTexture';
 
 function glitchStr(str, intensity = 0.15) {
   const chars = '!@#$%^&*01';
@@ -99,7 +100,7 @@ function useCanvasHUD({ currentRoom, isVRMode }) {
       ctx.fillStyle = isGlitch ? '#ef4444' : '#06b6d4';
       ctx.shadowColor = isGlitch ? 'rgba(239,68,68,0.4)' : 'rgba(34,211,238,0.6)';
       ctx.shadowBlur = isGlitch ? 15 : 30;
-      ctx.fillText(isGlitch ? glitchStr('RAKSHADATA', 0.15) : 'RAKSHADATA', lx + 150 + ox, ly + 90);
+      ctx.fillText(isGlitch ? glitchStr('RAKHSHDATA', 0.15) : 'RAKHSHDATA', lx + 150 + ox, ly + 90);
       ctx.shadowBlur = 0;
 
       ctx.font = '30px monospace';
@@ -186,19 +187,6 @@ function useCanvasHUD({ currentRoom, isVRMode }) {
       ctx.fillStyle = isGlitch ? '#ef4444' : '#06b6d4';
       ctx.fillText(isGlitch ? glitchStr('99999', 0.6) : '142 pkts/s', stx + 130, sty + 185);
 
-      const bx = w / 2 - 380, by = h - 200;
-      ctx.fillStyle = 'rgba(0,0,0,0.45)';
-      ctx.fillRect(bx, by, 760, 100);
-      ctx.strokeStyle = '#06b6d4';
-      ctx.lineWidth = 2;
-      ctx.strokeRect(bx, by, 760, 100);
-
-      ctx.font = 'bold 40px monospace';
-      ctx.fillStyle = '#06b6d4';
-      ctx.textAlign = 'center';
-      ctx.fillText('[ AKSES TERMINAL ]', w / 2, by + 62);
-      ctx.textAlign = 'left';
-
       ctx.font = '20px monospace';
       ctx.fillStyle = 'rgba(100,116,139,0.4)';
       ctx.fillText('ENCRYPTION: AES-256-GCM | PROTOCOL: TLS 1.3', 120, h - 60);
@@ -251,12 +239,13 @@ function App() {
   const [hasStarted, setHasStarted] = useState(false);
   const [mistakes, setMistakes] = useState(0);
   const [showEvaluation, setShowEvaluation] = useState(false);
+  const roomWelcomeVRTexture = useRoomWelcomeVRTexture({ isVRMode, welcome: roomWelcome });
   const dismissWelcome = () => setRoomWelcome(null);
 
   const roomKey = currentRoom === 'Raksha Basic' ? `basic-${roomStage}`
     : currentRoom === 'Raksha Expert' ? `expert-${roomStage}`
-    : currentRoom === 'Raksha Beginner' ? `beginner-${roomStage}`
-    : 'default';
+      : currentRoom === 'Raksha Beginner' ? `beginner-${roomStage}`
+        : 'default';
 
   const [keyboardConfig, setKeyboardConfig] = useState({
     context: '',
@@ -335,28 +324,86 @@ function App() {
       }, 100);
     }, 800);
   };
+  useEffect(() => {
+    const camera = document.querySelector('a-camera');
+    if (!camera) return;
 
+    let panelEl = document.getElementById('vr-welcome-panel');
+
+    // Kalau bukan VR / welcome nggak visible / texture belum siap → bersihin panel
+    if (!isVRMode || !roomWelcome?.visible || !roomWelcomeVRTexture) {
+      if (panelEl) panelEl.remove();
+      return;
+    }
+
+    if (!panelEl) {
+      panelEl = document.createElement('a-entity');
+      panelEl.setAttribute('id', 'vr-welcome-panel');
+      panelEl.setAttribute('position', '0 0 -1.6'); // nempel di depan kamera
+      camera.appendChild(panelEl);
+
+      const plane = document.createElement('a-plane');
+      // rasio canvas 2048:1180 dijaga di world-space
+      plane.setAttribute('width', '1.7');
+      plane.setAttribute('height', '0.98');
+      plane.setAttribute('material', 'shader: flat; side: double; transparent: true');
+      plane.setAttribute('class', 'clickable');
+      panelEl.appendChild(plane);
+
+      plane.addEventListener('click', () => dismissWelcome());
+
+      const applyTexture = () => {
+        const mesh = plane.getObject3D('mesh');
+        if (mesh && mesh.material) {
+          mesh.material.map = roomWelcomeVRTexture;
+          mesh.material.transparent = true;
+          mesh.material.needsUpdate = true;
+        }
+      };
+      if (plane.hasLoaded) applyTexture();
+      else plane.addEventListener('loaded', applyTexture, { once: true });
+    } else {
+      // Panel udah ada, texture-nya berubah (isi teks re-render tiap 150ms) → cukup update map
+      const plane = panelEl.querySelector('a-plane');
+      const mesh = plane?.getObject3D('mesh');
+      if (mesh && mesh.material) {
+        mesh.material.map = roomWelcomeVRTexture;
+        mesh.material.needsUpdate = true;
+      }
+    }
+  }, [isVRMode, roomWelcome?.visible, roomWelcomeVRTexture]);
   useEffect(() => {
     const sceneEl = sceneRef.current;
     if (!sceneEl) return;
 
+    const syncVRState = () => {
+      const inVR = typeof sceneEl.is === 'function' && sceneEl.is('vr-mode');
+      setIsVRMode(prev => (prev !== inVR ? inVR : prev));
+    };
+
     const handleEnterVR = () => {
-      setIsVRMode(true);
+      syncVRState();
       setRoomWelcome(null);
     };
-    const handleExitVR = () => setIsVRMode(false);
+    const handleExitVR = () => syncVRState();
     const handleFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement);
 
     sceneEl.addEventListener('enter-vr', handleEnterVR);
     sceneEl.addEventListener('exit-vr', handleExitVR);
     document.addEventListener('fullscreenchange', handleFullscreenChange);
 
+    // Fallback: kalau event enter-vr/exit-vr kelewat (race condition saat
+    // loading/reload asset), poll status asli scene tiap 500ms biar tetap sinkron.
+    const poll = setInterval(syncVRState, 500);
+    syncVRState(); // cek langsung di awal, jaga-jaga scene udah VR duluan
+
     return () => {
       sceneEl.removeEventListener('enter-vr', handleEnterVR);
       sceneEl.removeEventListener('exit-vr', handleExitVR);
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      clearInterval(poll);
     };
-  }, []);
+  }, [hasStarted]);
 
   useEffect(() => {
     if (isTransitioning || showEvaluation) return;
@@ -568,7 +615,12 @@ function App() {
         />
       )}
 
-      <a-scene ref={sceneRef} embedded style={{ width: '100%', height: '100%' }}>
+      <a-scene
+        ref={sceneRef}
+        embedded
+        webxr="optionalFeatures: local-floor, bounded-floor, hand-tracking;"
+        style={{ width: '100%', height: '100%' }}
+      >
         <a-assets timeout="15000">
           <a-asset-item id="model-hacker" src="/assets/hooded_hacker.glb"></a-asset-item>
           <a-asset-item id="model-key-pub" src="/assets/key_card.glb"></a-asset-item>
@@ -649,6 +701,7 @@ function App() {
         {!showEvaluation && currentRoom === 'Raksha Basic' && roomStage === 'room2' && (
           <RakshaBasicRoom2
             hasPaper={hasPaper}
+            isVRMode={isVRMode}
             onMistake={() => setMistakes(m => m + 1)}
             onBackToCorridor={() => {
               setRoomStage('corridor');

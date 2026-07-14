@@ -1,87 +1,115 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { room2Dialogues } from './dialogues';
+import NpcDialogueHUD from '../../components/NpcDialogueHUD'
+import { useNpcDialogueVRTexture } from '../../components/useNpcDialogueVRTexture';
 
-/* ============================================================
-   NPC COMPONENT — dialog ala gambar referensi
-   Sekarang narik nama/teks/warna/hasil dari room2Dialogues.js
-   lewat npcKey, jadi teksnya cuma ada di SATU tempat (dialogues.js).
-   ============================================================ */
-function NPC({ position, rotation = "0 0 0", npcKey, texture, onChoice }) {
+function VRDialoguePanel({ dialogue, onCancel, onConfirm }) {
+    const planeRef = useRef(null);
+    const texture = useNpcDialogueVRTexture({ isVRMode: true, dialogue });
+
+    useEffect(() => {
+        const el = planeRef.current;
+        if (!el || !texture) return;
+
+        const applyTexture = () => {
+            const mesh = el.getObject3D('mesh');
+            if (mesh && mesh.material) {
+                mesh.material.map = texture;
+                mesh.material.transparent = true;
+                mesh.material.needsUpdate = true;
+            }
+        };
+
+        if (el.hasLoaded) {
+            applyTexture();
+        } else {
+            el.addEventListener('loaded', applyTexture, { once: true });
+        }
+
+        return () => el.removeEventListener('loaded', applyTexture);
+    }, [texture]);
+
+    return (
+        <a-entity position="0 1.6 1.8">
+            <a-plane
+                ref={planeRef}
+                width="3.6"
+                height="1.35"
+                material="shader: flat; side: double; transparent: true"
+            ></a-plane>
+
+            {/* Click area BATAL — posisi sudah dihitung matching canvas */}
+            <a-box
+                className="clickable"
+                position="0.077 -0.464 0.05"
+                width="0.914" height="0.211" depth="0.05"
+                material="opacity: 0; transparent: true"
+                animation__hover="property: scale; to: 1.05 1.05 1.05; startEvents: mouseenter; dur: 150"
+                animation__leave="property: scale; to: 1 1 1; startEvents: mouseleave; dur: 150"
+                onClick={(e) => { e.stopPropagation(); onCancel(); }}
+            ></a-box>
+
+            {/* Click area BERI PASSWORD — posisi sudah dihitung matching canvas */}
+            <a-box
+                className="clickable"
+                position="1.132 -0.464 0.05"
+                width="1.055" height="0.211" depth="0.05"
+                material="opacity: 0; transparent: true"
+                animation__hover="property: scale; to: 1.05 1.05 1.05; startEvents: mouseenter; dur: 150"
+                animation__leave="property: scale; to: 1 1 1; startEvents: mouseleave; dur: 150"
+                onClick={(e) => { e.stopPropagation(); onConfirm(); }}
+            ></a-box>
+        </a-entity>
+    );
+}
+
+function NPC({ position, rotation = "0 0 0", npcKey, texture, onChoice, isVRMode, onOpenDialogue }) {
     const [showDialog, setShowDialog] = useState(false);
     const data = room2Dialogues[npcKey];
 
+    const handleTalk = () => {
+        if (isVRMode) {
+            setShowDialog(!showDialog);
+        } else {
+            onOpenDialogue(npcKey, position, rotation);
+        }
+    };
+
     return (
         <a-entity position={position} rotation={rotation}>
-            {/* NPC board */}
             <a-box class="solid" position="0 1.5 0" width="1.5" height="3" depth="0.1"
                 color="#1e293b" material="roughness: 0.5; metalness: 0.3"></a-box>
 
-            {/* NPC texture */}
             <a-plane position="0 1.5 0.06" width="1.4" height="2.9"
                 material={`src: ${texture}; roughness: 0.6; side: front`}></a-plane>
 
-            {/* Name tag — warna pakai isCorrect (success) dari data.js */}
             <a-box position="0 -0.1 0.06" width="1.5" height="0.3" depth="0.05"
                 color={data.success ? "#7c3aed" : "#475569"}></a-box>
             <a-text value={data.name} position="0 -0.1 0.1" align="center" color="#ffffff" scale="0.4 0.4 0.4" font="mozillavr"></a-text>
 
-            {/* Click area untuk memunculkan pop-up */}
             <a-box className="clickable" position="0 1.5 0.2" width="1.5" height="3" depth="0.5"
                 material="opacity: 0; transparent: true"
-                onClick={() => setShowDialog(!showDialog)}></a-box>
+                onClick={(e) => {
+                    e.stopPropagation();
+                    handleTalk();
+                }}></a-box>
 
-            {/* Dialog popup */}
-            {showDialog && (
-                <a-entity position="0 1.6 1.8">
-                    {/* Background Utama */}
-                    <a-plane position="0 0 0" width="3.6" height="2.2"
-                        material="color: #0f172a; roughness: 0.8; side: double"></a-plane>
-                    {/* Border / Garis Tepi — warna khas tiap NPC dari data.js */}
-                    <a-plane position="0 0 -0.01" width="3.66" height="2.26"
-                        material={`color: ${data.color}; roughness: 0.8; side: double`}></a-plane>
-
-                    {/* Header (Nama) */}
-                    <a-text value={data.name.toUpperCase()} position="0 0.8 0.02" align="center" color={data.color} scale="0.65 0.65 0.65" font="mozillavr"></a-text>
-
-                    {/* Teks Dialog Utama */}
-                    <a-text value={data.text} position="0 0.05 0.02" align="center" color="#f8fafc" scale="0.45 0.45 0.45" width="3.2" wrap-count="38" font="mozillavr"></a-text>
-
-                    {/* Barisan Tombol */}
-                    <a-entity position="0 -0.75 0.02">
-                        {/* Tombol Kiri: BATAL */}
-                        <a-entity position="-0.85 0 0">
-                            <a-box width="1.5" height="0.4" depth="0.05" color="#475569"
-                                className="clickable"
-                                animation__hover="property: scale; to: 1.05 1.05 1.05; startEvents: mouseenter; dur: 150"
-                                animation__leave="property: scale; to: 1 1 1; startEvents: mouseleave; dur: 150"
-                                onClick={(e) => { e.stopPropagation(); setShowDialog(false); }}></a-box>
-                            <a-text value="BATAL" position="0 0 0.03" align="center" color="#ffffff" scale="0.35 0.35 0.35" font="mozillavr"></a-text>
-                        </a-entity>
-
-                        {/* Tombol Kanan: BERI PASSWORD */}
-                        <a-entity position="0.85 0 0">
-                            <a-box width="1.5" height="0.4" depth="0.05" color="#10b981"
-                                className="clickable"
-                                animation__hover="property: scale; to: 1.05 1.05 1.05; startEvents: mouseenter; dur: 150"
-                                animation__leave="property: scale; to: 1 1 1; startEvents: mouseleave; dur: 150"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    setShowDialog(false); // Tutup dialog ini
-                                    onChoice(npcKey, position, rotation); // Kirim id NPC + koordinat ke Room2
-                                }}></a-box>
-                            <a-text value="BERI PASSWORD" position="0 0 0.03" align="center" color="#ffffff" scale="0.28 0.28 0.28" font="mozillavr"></a-text>
-                        </a-entity>
-                    </a-entity>
-                </a-entity>
+            {/* Popup VR baru — pakai canvas texture, ganti yang lama */}
+            {showDialog && isVRMode && (
+                <VRDialoguePanel
+                    dialogue={data}
+                    onCancel={() => setShowDialog(false)}
+                    onConfirm={() => {
+                        setShowDialog(false);
+                        onChoice(npcKey, position, rotation);
+                    }}
+                />
             )}
         </a-entity>
     );
 }
 
-/* ============================================================
-   HIJACKED POPUP — resultMessage dipecah jadi header + body
-   Format di dialogues.js: "[ JUDUL ]\n\nIsi penjelasan..."
-   ============================================================ */
 function HijackedPopup({ position, rotation, resultMessage, onRestart }) {
     const [header, ...rest] = (resultMessage || "").split("\n\n");
     const body = rest.join("\n\n");
@@ -215,14 +243,26 @@ function NoPaperPopup({ position, rotation, onBackToCorridor }) {
 // INFO PENTING:
 // Pastikan dari App.jsx Anda mengirimkan prop hasPaper={true} jika pemain sudah mengambil kertas di Koridor.
 // Jika prop ini bernilai false, pemain tidak akan bisa menyelesaikan Room 2.
-export default function Room2({ onBackToCorridor, onBackToMainMenu, hasPaper = false }) {
+export default function Room2({ onBackToCorridor, onBackToMainMenu, hasPaper = false, isVRMode = false }) {
     const [popupState, setPopupState] = useState({
         type: null, // 'hijacked', 'success', 'self-exit', 'nopaper', atau null
         position: "0 0 0",
         rotation: "0 0 0",
         resultMessage: ""
     });
+    const [activeDialogue, setActiveDialogue] = useState(null);
+    const handleOpenDialogue = (npcKey, pos, rot) => {
+        setActiveDialogue({ npcKey, position: pos, rotation: rot });
+    };
 
+    const handleDialogueCancel = () => setActiveDialogue(null);
+
+    const handleDialogueConfirm = () => {
+        if (!activeDialogue) return;
+        const { npcKey, position, rotation } = activeDialogue;
+        setActiveDialogue(null);
+        handleChoice(npcKey, position, rotation);
+    };
     // Event listener penangkap event "room2-self-exit-success" dari App.jsx
     useEffect(() => {
         const handleSelfExit = () => {
@@ -322,17 +362,18 @@ export default function Room2({ onBackToCorridor, onBackToMainMenu, hasPaper = f
                 material="src: #tex-office-ceiling; roughness: 0.9"></a-box>
 
             {/* ========== 4 NPC — teks & warna sekarang dari room2Dialogues.js ========== */}
-            <NPC position="-6 0 -3" rotation="0 30 0"
-                npcKey="temanMabar" texture="#npc-teman" onChoice={handleChoice} />
+            <NPC position="-6 0 -3" rotation="0 30 0" npcKey="temanMabar" texture="#npc-teman"
+                onChoice={handleChoice} isVRMode={isVRMode} onOpenDialogue={handleOpenDialogue} />
 
-            <NPC position="6 0 -3" rotation="0 -30 0"
-                npcKey="sahabat" texture="#npc-sahabat" onChoice={handleChoice} />
+            <NPC position="6 0 -3" rotation="0 -30 0" npcKey="sahabat" texture="#npc-sahabat"
+                onChoice={handleChoice} isVRMode={isVRMode} onOpenDialogue={handleOpenDialogue} />
 
-            <NPC position="-6 0 -13" rotation="0 45 0"
-                npcKey="adminPalsu" texture="#npc-admin" onChoice={handleChoice} />
+            <NPC position="-6 0 -13" rotation="0 45 0" npcKey="adminPalsu" texture="#npc-admin"
+                onChoice={handleChoice} isVRMode={isVRMode} onOpenDialogue={handleOpenDialogue} />
 
-            <NPC position="6 0 -13" rotation="0 -45 0"
-                npcKey="orangTua" texture="#npc-ortu" onChoice={handleChoice} />
+            <NPC position="6 0 -13" rotation="0 -45 0" npcKey="orangTua" texture="#npc-ortu"
+                onChoice={handleChoice} isVRMode={isVRMode} onOpenDialogue={handleOpenDialogue} />
+
 
             {/* Instruksi Tengah Ruangan */}
             <a-entity position="0 3.5 -8">
@@ -434,6 +475,14 @@ export default function Room2({ onBackToCorridor, onBackToMainMenu, hasPaper = f
                     rotation={popupState.rotation}
                     onMainMenu={onBackToMainMenu}
                 />
+            )}
+            {!isVRMode && activeDialogue && createPortal(
+                <NpcDialogueHUD
+                    dialogue={room2Dialogues[activeDialogue.npcKey]}
+                    onCancel={handleDialogueCancel}
+                    onConfirm={handleDialogueConfirm}
+                />,
+                document.body
             )}
         </a-entity>
     );

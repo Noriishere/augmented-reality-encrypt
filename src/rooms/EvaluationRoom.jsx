@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { getRoomEvaluation } from '../data/roomEvaluations';
+import { getRoomEvaluation } from '../rooms/roomEvaluations';
 
 // roomKey WAJIB diisi dari pemanggil, contoh: 'basic-room1', 'basic-room2', 'expert-room1'
 export default function EvaluationRoom({ mistakes, onBackToLobby, roomKey }) {
