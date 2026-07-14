@@ -381,10 +381,11 @@ function App() {
     'room1-exit': 'OUWI',
     'room2-enter': 'OUWO',
     'room2-self-exit': 'OUWI',
-    'beginner-pc': 'AWAL',
-    'beginner-safe': 'PETI',
-    'beginner-door': 'BUKA',
-    'beginner-system': 'AMAN'
+    'beginner-pc': 'GRQL',      
+    'beginner-safe': 'APKH',    
+    'beginner-door': 'YAHU',    
+    'beginner-system': 'CLIR',
+    'beginner-phishing': 'CLIR'
   };
 
   const handleVirtualKeyPress = (key) => {
