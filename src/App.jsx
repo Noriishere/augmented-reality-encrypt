@@ -110,7 +110,7 @@ function useCanvasHUD({ currentRoom, isVRMode }) {
       ctx.fillStyle = isGlitch ? '#ef4444' : '#06b6d4';
       ctx.shadowColor = isGlitch ? 'rgba(239,68,68,0.4)' : 'rgba(34,211,238,0.6)';
       ctx.shadowBlur = isGlitch ? 15 : 30;
-      ctx.fillText(isGlitch ? glitchStr('RAKHSHDATA', 0.15) : 'RAKHSHDATA', lx + 150 + ox, ly + 90);
+      ctx.fillText(isGlitch ? glitchStr('RAKSHADATA', 0.15) : 'RAKSHADATA', lx + 150 + ox, ly + 90);
       ctx.shadowBlur = 0;
 
       ctx.font = '30px monospace';
@@ -269,7 +269,11 @@ function App() {
   const [roomWelcome, setRoomWelcome] = useState(null);
   const [hasStarted, setHasStarted] = useState(false);
   const dismissWelcome = () => setRoomWelcome(null);
-  const [mistakes, setMistakes] = useState(0);
+
+  const roomKey = currentRoom === 'Raksha Basic' ? `basic-${roomStage}`
+  : currentRoom === 'Raksha Expert' ? `expert-${roomStage}`
+  : currentRoom === 'Raksha Beginner' ? `beginner-${roomStage}`
+  : 'default';
   // MENGGUNAKAN SATU STATE UNTUK SEMUA KONFIGURASI KEYBOARD
   const [keyboardConfig, setKeyboardConfig] = useState({
     context: '',
