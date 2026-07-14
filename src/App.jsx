@@ -13,9 +13,8 @@ import RoomWelcomeHUD from './components/RoomWelcomeHUD';
 import { resolveRoomIntro } from './components/roomIntros';
 import LandingPage from './components/LandingPage';
 import RakshaExpertCorridor from './rooms/RakshaExpert/Corridor';
-/* ============================================================
-   Canvas HUD — close to player, glitch working, clickable
-   ============================================================ */
+import EvaluationRoom from './rooms/EvaluationRoom';
+
 function glitchStr(str, intensity = 0.15) {
   const chars = '!@#$%^&*01';
   return str.split('').map(c =>
@@ -63,24 +62,19 @@ function useCanvasHUD({ currentRoom, isVRMode }) {
       const time = now.toLocaleTimeString('en-US', { hour12: false });
       const date = now.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }).toUpperCase();
 
-      // Glitch cycle — lebih subtle
-      glitchCycle.current = (glitchCycle.current + 1) % 120; // 120 frame cycle
-      const isGlitch = glitchCycle.current >= 115 && glitchCycle.current <= 118; // cuma 4 frame glitch per 4 detik
+      glitchCycle.current = (glitchCycle.current + 1) % 120;
+      const isGlitch = glitchCycle.current >= 115 && glitchCycle.current <= 118;
 
-      // Update IP — jarang
       if (glitchCycle.current === 0) ipRef.current = generateIP();
 
-      // === CLEAR ===
       ctx.clearRect(0, 0, w, h);
 
-      // Scanlines — sangat subtle
       ctx.strokeStyle = 'rgba(0,255,255,0.01)';
       ctx.lineWidth = 1;
       for (let y = 0; y < h; y += 12) {
         ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
       }
 
-      // Glitch bars — subtle
       if (isGlitch) {
         for (let i = 0; i < 3; i++) {
           const gy = Math.random() * h;
@@ -91,12 +85,8 @@ function useCanvasHUD({ currentRoom, isVRMode }) {
 
       const ox = isGlitch ? (Math.random() - 0.5) * 6 : 0;
 
-      // ==============================
-      // TOP LEFT
-      // ==============================
       const lx = 120, ly = 80;
 
-      // Logo
       ctx.fillStyle = 'rgba(6,182,212,0.12)';
       ctx.fillRect(lx + ox, ly, 120, 120);
       ctx.strokeStyle = '#06b6d4';
@@ -105,7 +95,6 @@ function useCanvasHUD({ currentRoom, isVRMode }) {
       ctx.fillStyle = 'rgba(6,182,212,0.35)';
       ctx.fillRect(lx + ox + 30, ly + 30, 60, 60);
 
-      // Title
       ctx.font = 'bold 110px monospace';
       ctx.fillStyle = isGlitch ? '#ef4444' : '#06b6d4';
       ctx.shadowColor = isGlitch ? 'rgba(239,68,68,0.4)' : 'rgba(34,211,238,0.6)';
@@ -117,7 +106,6 @@ function useCanvasHUD({ currentRoom, isVRMode }) {
       ctx.fillStyle = '#5a7a8a';
       ctx.fillText('CYBER DEFENSE TRAINING v2.4.1', lx + 150 + ox, ly + 130);
 
-      // Status panel
       const spx = lx + ox, spy = ly + 160;
       ctx.fillStyle = 'rgba(0,0,0,0.35)';
       ctx.fillRect(spx, spy, 800, 200);
@@ -148,9 +136,6 @@ function useCanvasHUD({ currentRoom, isVRMode }) {
       ctx.fillStyle = isGlitch ? 'rgba(239,68,68,0.2)' : 'rgba(6,182,212,0.12)';
       ctx.fillText(isGlitch ? glitchStr('01000110110010101001100111100101101001001010', 0.3) : '01000110110010101001100111100101101001001010', spx, spy + 230);
 
-      // ==============================
-      // TOP RIGHT
-      // ==============================
       const rx = w - 120;
 
       ctx.font = 'bold 100px monospace';
@@ -214,7 +199,6 @@ function useCanvasHUD({ currentRoom, isVRMode }) {
       ctx.fillText('[ AKSES TERMINAL ]', w / 2, by + 62);
       ctx.textAlign = 'left';
 
-      // Bottom info
       ctx.font = '20px monospace';
       ctx.fillStyle = 'rgba(100,116,139,0.4)';
       ctx.fillText('ENCRYPTION: AES-256-GCM | PROTOCOL: TLS 1.3', 120, h - 60);
@@ -222,7 +206,6 @@ function useCanvasHUD({ currentRoom, isVRMode }) {
       ctx.fillText('SESSION: IDXJAXN9', rx, h - 60);
       ctx.textAlign = 'left';
 
-      // Corners
       const ca = 100, co = 60;
       ctx.strokeStyle = 'rgba(6,182,212,0.5)';
       ctx.lineWidth = 4;
@@ -231,13 +214,11 @@ function useCanvasHUD({ currentRoom, isVRMode }) {
       ctx.beginPath(); ctx.moveTo(co, h - co - ca); ctx.lineTo(co, h - co); ctx.lineTo(co + ca, h - co); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(w - co - ca, h - co); ctx.lineTo(w - co, h - co); ctx.lineTo(w - co, h - co - ca); ctx.stroke();
 
-      // Side lines
       ctx.strokeStyle = 'rgba(6,182,212,0.15)';
       ctx.lineWidth = 3;
       ctx.beginPath(); ctx.moveTo(co + 3, h / 2 - 250); ctx.lineTo(co + 3, h / 2 + 250); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(w - co - 3, h / 2 - 250); ctx.lineTo(w - co - 3, h / 2 + 250); ctx.stroke();
 
-      // MUST update texture
       tex.needsUpdate = true;
     };
 
@@ -268,13 +249,15 @@ function App() {
   const [roomStage, setRoomStage] = useState('room1');
   const [roomWelcome, setRoomWelcome] = useState(null);
   const [hasStarted, setHasStarted] = useState(false);
+  const [mistakes, setMistakes] = useState(0);
+  const [showEvaluation, setShowEvaluation] = useState(false);
   const dismissWelcome = () => setRoomWelcome(null);
 
   const roomKey = currentRoom === 'Raksha Basic' ? `basic-${roomStage}`
-  : currentRoom === 'Raksha Expert' ? `expert-${roomStage}`
-  : currentRoom === 'Raksha Beginner' ? `beginner-${roomStage}`
-  : 'default';
-  // MENGGUNAKAN SATU STATE UNTUK SEMUA KONFIGURASI KEYBOARD
+    : currentRoom === 'Raksha Expert' ? `expert-${roomStage}`
+    : currentRoom === 'Raksha Beginner' ? `beginner-${roomStage}`
+    : 'default';
+
   const [keyboardConfig, setKeyboardConfig] = useState({
     context: '',
     position: '0 1.4 -10.8',
@@ -283,6 +266,7 @@ function App() {
 
   const handleSelectRoom = (roomName) => {
     setIsTransitioning(true);
+    setMistakes(0);
 
     setTimeout(() => {
       setCurrentRoom(roomName);
@@ -352,7 +336,6 @@ function App() {
     }, 800);
   };
 
-
   useEffect(() => {
     const sceneEl = sceneRef.current;
     if (!sceneEl) return;
@@ -376,7 +359,7 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (isTransitioning) return;
+    if (isTransitioning || showEvaluation) return;
     if (currentRoom === 'LOBBY') { setRoomWelcome(null); return; }
 
     const sceneIsVR = sceneRef.current?.is?.('vr-mode');
@@ -384,7 +367,8 @@ function App() {
 
     const intro = resolveRoomIntro(currentRoom, roomStage);
     if (intro) setRoomWelcome({ ...intro, visible: true });
-  }, [currentRoom, roomStage, isTransitioning]);
+  }, [currentRoom, roomStage, isTransitioning, showEvaluation]);
+
   const toggleFullScreen = () => {
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen().catch(err => console.error(err));
@@ -419,11 +403,10 @@ function App() {
         } else if (keyboardConfig.context === 'room2-enter') {
           goToRoom2();
         } else if (keyboardConfig.context === 'room2-self-exit') {
-          // <-- Tambahkan blok if ini
-          // Memancarkan sinyal ke Room 2 untuk memunculkan pop-up kemenangan rahasia
           window.dispatchEvent(new CustomEvent('room2-self-exit-success'));
         }
       } else {
+        setMistakes(m => m + 1);
         alert('PIN salah! Coba lagi.');
         setPin('');
       }
@@ -454,6 +437,7 @@ function App() {
   if (!hasStarted) {
     return <LandingPage onStart={() => setHasStarted(true)} />;
   }
+
   const goToRoom2 = () => {
     setIsTransitioning(true);
     setTimeout(() => {
@@ -469,6 +453,7 @@ function App() {
       }, 100);
     }, 800);
   };
+
   const goToExpertCorridor = () => {
     setIsTransitioning(true);
     setTimeout(() => {
@@ -493,6 +478,7 @@ function App() {
       }, 100);
     }, 800);
   };
+
   const goToCorridor = () => {
     setIsTransitioning(true);
     setTimeout(() => {
@@ -511,6 +497,40 @@ function App() {
             look.pitchObject.rotation.x = 0;
           }
         }
+      }
+
+      setTimeout(() => {
+        setIsTransitioning(false);
+        sceneRef.current?.emit('refresh-solids');
+      }, 100);
+    }, 800);
+  };
+
+  const goToEvaluation = (overrideStage) => {
+    setIsTransitioning(true);
+    setTimeout(() => {
+      if (overrideStage) setRoomStage(overrideStage);
+      setShowEvaluation(true);
+      setTimeout(() => {
+        setIsTransitioning(false);
+        sceneRef.current?.emit('refresh-solids');
+      }, 100);
+    }, 800);
+  };
+
+  const handleReturnFromEvaluation = () => {
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setShowEvaluation(false);
+      setCurrentRoom('LOBBY');
+      setRoomStage('room1');
+      setHasPaper(false);
+      setMistakes(0);
+
+      const playerRig = document.getElementById('rig');
+      if (playerRig) {
+        playerRig.object3D.position.set(0, 0, 0);
+        playerRig.object3D.rotation.set(0, 0, 0);
       }
 
       setTimeout(() => {
@@ -596,7 +616,7 @@ function App() {
           <MainMenu onSelectRoom={handleSelectRoom} />
         )}
 
-        {currentRoom === 'Raksha Basic' && roomStage === 'room1' && (
+        {!showEvaluation && currentRoom === 'Raksha Basic' && roomStage === 'room1' && (
           <RakshaBasicRoom1
             onInteractTerminal={() => {
               setKeyboardConfig({ context: 'room1-exit', position: '0 1.4 -10.8', rotation: '-10 0 0' });
@@ -605,7 +625,7 @@ function App() {
           />
         )}
 
-        {currentRoom === 'Raksha Basic' && roomStage === 'corridor' && (
+        {!showEvaluation && currentRoom === 'Raksha Basic' && roomStage === 'corridor' && (
           <RakshaBasicCorridor
             hasPaper={hasPaper}
             onPickPaper={() => setHasPaper(true)}
@@ -625,9 +645,10 @@ function App() {
           />
         )}
 
-        {currentRoom === 'Raksha Basic' && roomStage === 'room2' && (
+        {!showEvaluation && currentRoom === 'Raksha Basic' && roomStage === 'room2' && (
           <RakshaBasicRoom2
             hasPaper={hasPaper}
+            onMistake={() => setMistakes(m => m + 1)}
             onBackToCorridor={() => {
               setRoomStage('corridor');
               const playerRig = document.getElementById('rig');
@@ -636,61 +657,39 @@ function App() {
                 playerRig.object3D.rotation.set(0, 0, 0);
               }
             }}
-            onBackToMainMenu={() => {
-              setCurrentRoom('LOBBY');
-              setRoomStage('room1');
-              setHasPaper(false); // reset saat kembali ke menu, biar main ulang bersih
-              const playerRig = document.getElementById('rig');
-              if (playerRig) {
-                playerRig.object3D.position.set(0, 0, 0);
-                playerRig.object3D.rotation.set(0, 0, 0);
-              }
-            }}
+            onBackToMainMenu={() => goToEvaluation()}
           />
         )}
 
-        {currentRoom !== 'LOBBY' && (
+        {!showEvaluation && currentRoom !== 'LOBBY' && (
           <a-sky color="#0a0e14"></a-sky>
         )}
-        {currentRoom === 'Raksha Expert' && roomStage === 'room1' && (
+
+        {!showEvaluation && currentRoom === 'Raksha Expert' && roomStage === 'room1' && (
           <RakshaExpertRoom1
             onEnterCorridor={goToExpertCorridor}
           />
         )}
 
-        {currentRoom === 'Raksha Expert' && roomStage === 'corridor' && (
+        {!showEvaluation && currentRoom === 'Raksha Expert' && roomStage === 'corridor' && (
           <RakshaExpertCorridor
-            onExitToLobby={() => {
-              setCurrentRoom('LOBBY');
-              setRoomStage('room1');
-
-              const playerRig = document.getElementById('rig');
-              if (playerRig) {
-                playerRig.object3D.position.set(0, 0, 0);
-                playerRig.object3D.rotation.set(0, 0, 0);
-              }
-            }}
+            onExitToLobby={() => goToEvaluation('room1')}
           />
         )}
-        {currentRoom !== 'LOBBY' && (
-          <a-sky color="#0a0e14"></a-sky>
-        )}
 
-        {currentRoom === 'Raksha Beginner' && roomStage === 'room1' && (
+        {!showEvaluation && currentRoom === 'Raksha Beginner' && roomStage === 'room1' && (
           <RakshaBeginnerRoom
-            onInteractTerminal={() => {
-              setCurrentRoom('LOBBY');
-              setRoomStage('room1');
-
-              const playerRig = document.getElementById('rig');
-              if (playerRig) {
-                playerRig.object3D.position.set(0, 0, 0);
-                playerRig.object3D.rotation.set(0, 0, 0);
-              }
-            }}
+            onInteractTerminal={() => goToEvaluation()}
           />
         )}
 
+        {showEvaluation && (
+          <EvaluationRoom
+            mistakes={mistakes}
+            roomKey={roomKey}
+            onBackToLobby={handleReturnFromEvaluation}
+          />
+        )}
 
         {showKeyboard && (
           <VirtualKeyboard
