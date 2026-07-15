@@ -17,67 +17,137 @@ export default function EvaluationRoom({ mistakes, onBackToLobby, roomKey }) {
                 camera.components['look-controls'].pitchObject.rotation.x = 0;
             }
         }
+
+        // Pastikan free-move mendeteksi dinding .solid yang baru saja di-mount
+        const scene = document.querySelector('a-scene');
+        if (scene) {
+            scene.emit('refresh-solids');
+        }
     }, []);
 
     const statusMessage = isPerfect
         ? evalData.perfectMessage
         : evalData.imperfectMessage(mistakes);
 
+    const accent = isPerfect ? "#10b981" : "#f59e0b";
+
+    // Bingkai TV reusable
+    const TVFrame = ({ position, width, height, children }) => (
+        <a-entity position={position}>
+            <a-box position="0 0 -0.05" width={width + 0.2} height={height + 0.2} depth="0.08"
+                color="#1e293b" material="roughness: 0.5; metalness: 0.5"></a-box>
+
+            <a-box position="0 0 0.005" width={width + 0.05} height={height + 0.05} depth="0.01"
+                material={`color: ${accent}; emissive: ${accent}; emissiveIntensity: 1; opacity: 0.85; transparent: true`}></a-box>
+
+            <a-box position="0 0 0.02" width={width} height={height} depth="0.02"
+                material="color: #0a0f1a; roughness: 0.4; opacity: 0.97; transparent: true"></a-box>
+
+            {[[-1, 1, 1, 1], [1, 1, -1, 1], [-1, -1, 1, -1], [1, -1, -1, -1]].map(([sx, sy, dx, dy], i) => (
+                <a-entity key={`tick-${i}`} position={`${sx * (width / 2 - 0.25)} ${sy * (height / 2 - 0.25)} 0.03`}>
+                    <a-box position={`${dx * 0.09} 0 0`} width="0.18" height="0.02" depth="0.005"
+                        material="color: #22d3ee; emissive: #22d3ee; emissiveIntensity: 1"></a-box>
+                    <a-box position={`0 ${dy * 0.09} 0`} width="0.02" height="0.18" depth="0.005"
+                        material="color: #22d3ee; emissive: #22d3ee; emissiveIntensity: 1"></a-box>
+                </a-entity>
+            ))}
+
+            <a-sphere position={`${width / 2 - 0.15} ${height / 2 - 0.15} 0.05`} radius="0.025"
+                material={`color: ${accent}; emissive: ${accent}; emissiveIntensity: 3`}
+                animation="property: material.emissiveIntensity; from: 1; to: 4; dir: alternate; loop: true; dur: 600">
+            </a-sphere>
+
+            {children}
+        </a-entity>
+    );
+
     return (
         <a-entity id="evaluation-room">
+            {/* ===== RUANGAN ===== */}
             <a-sky color="#020617"></a-sky>
-            <a-light type="ambient" color="#1e293b" intensity="0.5"></a-light>
-            <a-light type="point" color={isPerfect ? "#10b981" : "#eab308"} intensity="0.8" position="0 2 0"></a-light>
+            <a-light type="ambient" color="#1e293b" intensity="0.55"></a-light>
+            <a-light type="point" color={accent} intensity="0.9" position="0 3 -3"></a-light>
+            <a-light type="point" color="#0ea5e9" intensity="0.35" position="0 2 2"></a-light>
 
-            {/* ===== PANEL 1 — STATUS EVALUASI (berbasis kesalahan) ===== */}
-            <a-entity position="0 2.1 0">
-                <a-plane position="0 0 -3" width="5.5" height="2.9" color="#0f172a" material="opacity: 0.95">
-                    <a-box position="0 0 -0.01" width="5.6" height="3" depth="0.01"
-                        color={isPerfect ? "#10b981" : "#f59e0b"}></a-box>
+            {/* Lantai */}
+            <a-plane position="0 0 0" rotation="-90 0 0" width="11" height="10"
+                material="color: #0b1220; roughness: 0.85; metalness: 0.15"></a-plane>
 
-                    <a-text value="[ LAPORAN EVALUASI KADET ]" position="0 1.1 0.02" align="center"
-                        color={isPerfect ? "#34d399" : "#fbbf24"} scale="0.65 0.65 0.65" font="mozillavr"></a-text>
-                    <a-text value={evalData.roomLabel} position="0 0.78 0.02" align="center"
-                        color="#94a3b8" scale="0.28 0.28 0.28" font="mozillavr" width="5" wrap-count="50"></a-text>
+            {/* Dinding belakang */}
+            <a-plane position="0 2.5 -4" width="11" height="5" className="solid"
+                material="color: #0f172a; roughness: 0.9"></a-plane>
 
-                    <a-text value={isPerfect ? "STATUS: SEMPURNA" : `STATUS: SELESAI — ${mistakes} KESALAHAN`}
-                        position="0 0.42 0.02" align="center"
-                        color={isPerfect ? "#34d399" : "#fbbf24"} scale="0.34 0.34 0.34" font="mozillavr"></a-text>
+            {/* Dinding depan (baru) — menghadap ke dalam ruangan */}
+            <a-plane position="0 2.5 4" rotation="0 180 0" width="11" height="5" className="solid"
+                material="color: #0f172a; roughness: 0.9"></a-plane>
 
-                    <a-text value={statusMessage} position="0 -0.3 0.02" align="center"
-                        color="#e2e8f0" scale="0.34 0.34 0.34" width="4.8" wrap-count="48" font="mozillavr"></a-text>
-                </a-plane>
-            </a-entity>
+            {/* Dinding kiri & kanan */}
+            <a-plane position="-5.5 2.5 0" rotation="0 90 0" width="8" height="5" className="solid"
+                material="color: #0c1524; roughness: 0.9"></a-plane>
+            <a-plane position="5.5 2.5 0" rotation="0 -90 0" width="8" height="5" className="solid"
+                material="color: #0c1524; roughness: 0.9"></a-plane>
 
-            {/* ===== PANEL 2 — APA YANG SUDAH KAMU PELAJARI ===== */}
-            <a-entity position="0 -0.6 0">
-                <a-plane position="0 0 -3" width="5.5" height="2.7" color="#0f172a" material="opacity: 0.95">
-                    <a-box position="0 0 -0.01" width="5.6" height="2.8" depth="0.01" color="#0ea5e9"></a-box>
+            {/* Garis neon lantai-dinding */}
+            <a-box position="0 0.015 -4" width="11" height="0.03" depth="0.03"
+                material={`color: ${accent}; emissive: ${accent}; emissiveIntensity: 1`}></a-box>
 
-                    <a-text value="[ APA YANG SUDAH KAMU PELAJARI ]" position="0 1.05 0.02" align="center"
-                        color="#38bdf8" scale="0.38 0.38 0.38" font="mozillavr"></a-text>
-                    <a-text value={evalData.topic} position="0 0.78 0.02" align="center"
-                        color="#94a3b8" scale="0.26 0.26 0.26" font="mozillavr"></a-text>
+            {/* ===== TV 1 (KIRI) — STATUS EVALUASI ===== */}
+            <TVFrame position="-2.6 2.4 -3.88" width={4.8} height={3.2}>
+                <a-text value="LOG SISTEM // LAPORAN EVALUASI" position="0 1.3 0.04" align="center"
+                    color="#5a7a8a" scale="0.35 0.35 0.35" font="mozillavr"></a-text>
 
-                    <a-text value={evalData.objective} position="0 0.5 0.02" align="center"
-                        color="#f1f5f9" scale="0.27 0.27 0.27" width="4.8" wrap-count="52" font="mozillavr"></a-text>
+                <a-text value="[ LAPORAN EVALUASI KADET ]" position="0 1.0 0.035" align="center"
+                    color={accent} scale="0.6 0.6 0.6" font="mozillavr"></a-text>
 
-                    {evalData.lessons.map((lesson, i) => (
-                        <a-text key={i} value={`• ${lesson}`}
-                            position={`-2.55 ${0.05 - i * 0.4} 0.02`}
-                            align="left" color="#cbd5e1" scale="0.23 0.23 0.23"
-                            width="4.6" wrap-count="60" font="mozillavr"></a-text>
-                    ))}
-                </a-plane>
-            </a-entity>
+                <a-text value={evalData.roomLabel} position="0 0.6 0.04" align="center"
+                    color="#94a3b8" scale="0.6 0.6 0.6" width="4.4" wrap-count="38" font="mozillavr"></a-text>
 
-            {/* Tombol kembali */}
-            <a-entity position="0 -2.6 -3">
-                <a-box width="2.5" height="0.4" depth="0.05" color={isPerfect ? "#059669" : "#d97706"} className="clickable"
+                <a-box position="0 0.3 0.03" width="4.2" height="0.012" depth="0.005"
+                    material={`color: ${accent}; emissive: ${accent}; emissiveIntensity: 1`}></a-box>
+
+                <a-text value={isPerfect ? "STATUS: SEMPURNA" : `STATUS: SELESAI — ${mistakes} KESALAHAN`}
+                    position="0 -0.1 0.04" align="center"
+                    color={accent} scale="0.6 0.6 0.6" font="mozillavr"></a-text>
+
+                <a-text value={statusMessage} position="0 -0.7 0.04" align="center"
+                    color="#e2e8f0" scale="0.6 0.6 0.6" width="4.4" wrap-count="35" font="mozillavr"></a-text>
+            </TVFrame>
+
+            {/* ===== TV 2 (KANAN) — APA YANG SUDAH KAMU PELAJARI ===== */}
+            <TVFrame position="2.6 2.4 -3.88" width={4.8} height={3.2}>
+                <a-text value="[ APA YANG SUDAH KAMU PELAJARI ]" position="0 1.25 0.035" align="center"
+                    color="#38bdf8" scale="0.70 0.70 0.70" font="mozillavr"></a-text>
+
+                <a-text value={evalData.topic} position="0 0.95 0.04" align="center"
+                    color="#94a3b8" scale="0.70 0.70 0.70" font="mozillavr"></a-text>
+
+                <a-text value={evalData.objective} position="0 0.6 0.04" align="center"
+                    color="#f1f5f9" scale="0.60 0.60 0.60" width="4.4" wrap-count="42" font="mozillavr"></a-text>
+
+                {evalData.lessons.map((lesson, i) => (
+                    <a-text key={i} value={`• ${lesson}`}
+                        position={`-2.1 ${0.1 - i * 0.45} 0.04`} 
+                        align="left" color="#cbd5e1" scale="0.60 0.60 0.60"
+                        width="4.4" wrap-count="45" font="mozillavr"></a-text>
+                ))}
+            </TVFrame>
+
+            {/* ===== KONSOL (TENGAH) — TOMBOL KEMBALI KE LOBBY ===== */}
+            <a-entity position="0 0 1.4">
+                <a-box position="0 0.5 0" width="1.4" height="1" depth="0.6"
+                    className="solid" color="#111827" material="roughness: 0.5; metalness: 0.4"></a-box>
+
+                <a-box position="0 1.02 0" width="1.3" height="0.04" depth="0.5"
+                    className="solid" material={`color: ${accent}; emissive: ${accent}; emissiveIntensity: 0.8`}></a-box>
+
+                <a-box position="0 0.75 0.31" width="1.1" height="0.35" depth="0.05"
+                    className="solid" color={isPerfect ? "#059669" : "#d97706"} className="clickable"
                     animation__hover="property: scale; to: 1.05 1.05 1.05; startEvents: mouseenter; dur: 200"
                     animation__leave="property: scale; to: 1 1 1; startEvents: mouseleave; dur: 200"
                     onClick={onBackToLobby}></a-box>
-                <a-text value="KEMBALI KE LOBBY" position="0 0 0.03" align="center" color="#ffffff" scale="0.4 0.4 0.4" font="mozillavr"></a-text>
+                    
+                <a-text value="KEMBALI KE LOBBY" position="0 0.75 0.34" align="center"
+                    color="#ffffff" scale="0.35 0.35 0.35" font="mozillavr"></a-text>
             </a-entity>
         </a-entity>
     );
