@@ -49,9 +49,9 @@ function KeypadPanel({ position, rotation = "0 0 0", onClick }) {
 
 function InfoBoard({ position, rotation = "0 0 0", isPlaying, videoSrc = "#vid-tutorial-kadet", onVideoEnded }) {
     const legend = [
-        { color: "#22c55e", glow: "#0a5c28", label: "HIJAU", desc: "BASIC — Tingkat SD" },
-        { color: "#eab308", glow: "#713f12", label: "KUNING", desc: "BEGINNER — Tingkat SMP" },
-        { color: "#ef4444", glow: "#7f1d1d", label: "MERAH", desc: "EXPERT — Tingkat SMK" },
+        { color: "#22c55e", glow: "#0a5c28", label: "HIJAU", desc: "BASIC — Tingkat Dasar" },
+        { color: "#eab308", glow: "#713f12", label: "KUNING", desc: "BEGINNER — Tingkat Pemula" },
+        { color: "#ef4444", glow: "#7f1d1d", label: "MERAH", desc: "EXPERT — Tingkat Ahli" },
     ];
 
     const videoEntityRef = useRef(null);
@@ -137,16 +137,16 @@ function InfoBoard({ position, rotation = "0 0 0", isPlaying, videoSrc = "#vid-t
                         material="color: #38bdf8; emissive: #38bdf8; emissiveIntensity: 1"></a-box>
 
                     <a-text value="Pilih pintu sesuai tingkat kesulitanmu:" position="0 1.9 0.03" align="center"
-                        color="#a5d8e6" scale="0.38 0.38 0.38" font="mozillavr"></a-text>
+                        color="#a5d8e6" scale="0.6 0.6 0.6" font="mozillavr"></a-text>
 
                     {legend.map((item, i) => (
                         <a-entity key={`legend-${i}`} position={`0 ${1.55 - i * 0.42} 0.03`}>
-                            <a-plane position="-1.7 0 0" width="0.22" height="0.22"
+                            <a-plane position="-1.7 0 0.1" width="0.22" height="0.22"
                                 material={`color: ${item.color}; emissive: ${item.glow}; emissiveIntensity: 1.2`}></a-plane>
                             <a-text value={item.label} position="-1.3 0 0.01" align="left"
-                                color={item.color} scale="0.4 0.4 0.4" font="mozillavr"></a-text>
+                                color={item.color} scale="0.6 0.6 0.6" font="mozillavr"></a-text>
                             <a-text value={item.desc} position="-0.55 0 0.01" align="left"
-                                color="#cbd5e1" scale="0.34 0.34 0.34" font="mozillavr"></a-text>
+                                color="#cbd5e1" scale="0.6 0.6 0.6" font="mozillavr"></a-text>
                         </a-entity>
                     ))}
 

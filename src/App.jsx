@@ -428,9 +428,9 @@ function App() {
     'room1-exit': 'OUWI',
     'room2-enter': 'OUWO',
     'room2-self-exit': 'OUWI',
-    'beginner-pc': 'GRQL',      
-    'beginner-safe': 'APKH',    
-    'beginner-door': 'YAHU',    
+    'beginner-pc': 'GRQL',
+    'beginner-safe': 'APKH',
+    'beginner-door': 'YAHU',
     'beginner-system': 'CLIR',
     'beginner-phishing': 'CLIR'
   };
@@ -624,7 +624,13 @@ function App() {
         <a-assets timeout="15000">
           <a-asset-item id="model-hacker" src="/assets/hooded_hacker.glb"></a-asset-item>
           <a-asset-item id="model-key-pub" src="/assets/key_card.glb"></a-asset-item>
-          <video id="vid-tutorial-kadet" src="/assets/videos/tutorial-kadet.mp4" preload="auto" playsinline webkit-playsinline></video>
+          <video
+            id="vid-tutorial-kadet"
+            src="/assets/videos/tutorial-kadet.mp4"
+            preload="auto"
+            playsInline
+            webkit-playsinline="true"
+          ></video>
           <img id="tex-dc-floor" src="/assets/dc_floor.png" crossOrigin="anonymous" />
           <img id="tex-dc-wall" src="/assets/dc_wall.png" crossOrigin="anonymous" />
           <img id="tex-dc-ceiling" src="/assets/dc_ceiling.png" crossOrigin="anonymous" />
