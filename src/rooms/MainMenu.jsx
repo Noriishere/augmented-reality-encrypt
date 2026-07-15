@@ -165,7 +165,7 @@ function InfoBoard({ position, rotation = "0 0 0", isPlaying, videoSrc = "#vid-t
                         color="#5a7a8a" scale="0.26 0.26 0.26" font="mozillavr"></a-text>
 
                     <a-video ref={videoEntityRef} src={videoSrc}
-                        position="0 1.42 0.03" width="4" height="2.25"></a-video>
+                        position="0 1.42 0.04" width="4" height="2.25"></a-video>
 
                     {needsManualPlay && (
                         <a-box position="0 1.42 0.06" width="4" height="2.25" depth="0.01"
