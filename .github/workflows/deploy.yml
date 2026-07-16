@@ -38,4 +38,4 @@ jobs:
         port: 22 # Port SSH standar VPS kamu
         source: "dist/*" # Jika pakai Vite, hasilnya ada di folder dist. Jika CRA, ganti jadi "build/*"
         target: "/www/wwwroot/rakshadata.naltylabs.my.id"
-        strip_components: 1 # Menghilangkan folder 'dist' agar isinya langsung masuk ke target
+        strip_components: 1
