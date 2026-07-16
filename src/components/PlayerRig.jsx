@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import VirtualKeyboard from './VirtualKeyboard'; // 1. Import VirtualKeyboard
+import VirtualKeyboard from './VirtualKeyboard';
 
 if (typeof AFRAME !== 'undefined' && !AFRAME.components['wire-box']) {
   AFRAME.registerComponent('wire-box', {
@@ -22,7 +22,7 @@ if (typeof AFRAME !== 'undefined' && !AFRAME.components['wire-box']) {
     }
   });
 }
-// Free movement dengan collision detection yang lebih robust
+
 if (typeof AFRAME !== 'undefined' && !AFRAME.components['free-move']) {
   AFRAME.registerComponent('free-move', {
     schema: {
@@ -41,16 +41,27 @@ if (typeof AFRAME !== 'undefined' && !AFRAME.components['free-move']) {
       this.onKeyUp = (e) => { this.keys[e.code] = false; };
       window.addEventListener('keydown', this.onKeyDown);
       window.addEventListener('keyup', this.onKeyUp);
-      this.el.addEventListener('axismove', (e) => {
+
+      this.onAxisMove = (e) => {
         const axis = e.detail.axis;
         this.axisX = Math.abs(axis[0]) > 0.1 ? axis[0] : 0;
         this.axisZ = Math.abs(axis[1]) > 0.1 ? axis[1] : 0;
-      });
-      this.el.addEventListener('thumbstickmoved', (e) => {
+      };
+      this.onThumbstickMoved = (e) => {
         this.axisX = Math.abs(e.detail.x) > 0.1 ? e.detail.x : 0;
         this.axisZ = Math.abs(e.detail.y) > 0.1 ? e.detail.y : 0;
-      });
+      };
+
+      this.el.addEventListener('axismove', this.onAxisMove);
+      this.el.addEventListener('thumbstickmoved', this.onThumbstickMoved);
+
       this.rig = document.getElementById('rig') || this.el;
+
+      this.controllerEls = Array.from(this.rig.querySelectorAll('[laser-controls]'));
+      this.controllerEls.forEach((el) => {
+        el.addEventListener('axismove', this.onAxisMove);
+        el.addEventListener('thumbstickmoved', this.onThumbstickMoved);
+      });
 
       this.el.sceneEl.addEventListener('loaded', () => this.refreshSolids());
       this.el.sceneEl.addEventListener('refresh-solids', () => {
@@ -66,6 +77,12 @@ if (typeof AFRAME !== 'undefined' && !AFRAME.components['free-move']) {
     remove: function () {
       window.removeEventListener('keydown', this.onKeyDown);
       window.removeEventListener('keyup', this.onKeyUp);
+      this.el.removeEventListener('axismove', this.onAxisMove);
+      this.el.removeEventListener('thumbstickmoved', this.onThumbstickMoved);
+      this.controllerEls.forEach((el) => {
+        el.removeEventListener('axismove', this.onAxisMove);
+        el.removeEventListener('thumbstickmoved', this.onThumbstickMoved);
+      });
     },
     tick: function () {
       if (!this.data.enabled) return;
@@ -76,12 +93,17 @@ if (typeof AFRAME !== 'undefined' && !AFRAME.components['free-move']) {
       const s = this.data.speed;
       let mx = 0, mz = 0;
 
-      if (this.keys['KeyW'] || this.keys['ArrowUp']) mz = -s;
-      if (this.keys['KeyS'] || this.keys['ArrowDown']) mz = s;
-      if (this.keys['KeyA'] || this.keys['ArrowLeft']) mx = -s;
-      if (this.keys['KeyD'] || this.keys['ArrowRight']) mx = s;
+      let kx = 0, kz = 0;
+      if (this.keys['KeyW'] || this.keys['ArrowUp']) kz -= 1;
+      if (this.keys['KeyS'] || this.keys['ArrowDown']) kz += 1;
+      if (this.keys['KeyA'] || this.keys['ArrowLeft']) kx -= 1;
+      if (this.keys['KeyD'] || this.keys['ArrowRight']) kx += 1;
 
-      if (Math.abs(this.axisX) > 0.01 || Math.abs(this.axisZ) > 0.01) {
+      if (kx !== 0 || kz !== 0) {
+        const len = Math.sqrt(kx * kx + kz * kz);
+        mx = (kx / len) * s;
+        mz = (kz / len) * s;
+      } else if (Math.abs(this.axisX) > 0.01 || Math.abs(this.axisZ) > 0.01) {
         mx = this.axisX * s;
         mz = this.axisZ * s;
       }
@@ -93,15 +115,11 @@ if (typeof AFRAME !== 'undefined' && !AFRAME.components['free-move']) {
       this.velocity.x += (moveX - this.velocity.x) * 0.3;
       this.velocity.z += (moveZ - this.velocity.z) * 0.3;
 
-      // =======================================================
-      // SISTEM TABRAKAN — sphere vs OBB (bukan world AABB)
-      // =======================================================
       const pos = this.rig.object3D.position;
       this.rig.object3D.updateMatrixWorld(true);
 
-      const PLAYER_RADIUS = 0.35; // kira-kira setara 0.5+padding sebelumnya
+      const PLAYER_RADIUS = 0.35;
 
-      // helper: cek apakah titik (world space) nabrak box lokal el
       const hitsWall = (el, worldX, worldY, worldZ) => {
         if (!el.object3D) return false;
         el.object3D.updateMatrixWorld(true);
@@ -111,11 +129,9 @@ if (typeof AFRAME !== 'undefined' && !AFRAME.components['free-move']) {
         const { width = 1, height = 1, depth = 1 } = mesh.geometry.parameters;
         const halfX = width / 2, halfY = height / 2, halfZ = depth / 2;
 
-        // invers matrix world -> transform titik dunia ke ruang lokal wall
         const invMatrix = new THREE.Matrix4().copy(el.object3D.matrixWorld).invert();
         const localPoint = new THREE.Vector3(worldX, worldY, worldZ).applyMatrix4(invMatrix);
 
-        // clamp titik lokal ke dalam box (closest point on box)
         const clampedX = Math.max(-halfX, Math.min(halfX, localPoint.x));
         const clampedY = Math.max(-halfY, Math.min(halfY, localPoint.y));
         const clampedZ = Math.max(-halfZ, Math.min(halfZ, localPoint.z));
@@ -139,13 +155,12 @@ if (typeof AFRAME !== 'undefined' && !AFRAME.components['free-move']) {
 
       if (collideX) this.velocity.x = 0;
       if (collideZ) this.velocity.z = 0;
-      // =======================================================
 
       pos.x += this.velocity.x;
       pos.z += this.velocity.z;
 
-      if (mx === 0 && Math.abs(this.axisX) < 0.01) this.velocity.x *= 0.85;
-      if (mz === 0 && Math.abs(this.axisZ) < 0.01) this.velocity.z *= 0.85;
+      if (mx === 0) this.velocity.x *= 0.85;
+      if (mz === 0) this.velocity.z *= 0.85;
 
       const text = document.getElementById("debug-text");
       if (text) {
@@ -155,7 +170,6 @@ if (typeof AFRAME !== 'undefined' && !AFRAME.components['free-move']) {
   });
 }
 
-// 2. Tambahkan currentInput dan handleVirtualKeyPress di parameter
 export default function PlayerRig({
   isKeyboardOpen,
   onToggleKeyboard,
@@ -170,6 +184,7 @@ export default function PlayerRig({
   const hudRef = useRef(null);
   const terminalRef = useRef(null);
   const circleRef = useRef(null);
+
   useEffect(() => {
     let id;
 
@@ -198,6 +213,7 @@ YAW : ${THREE.MathUtils.radToDeg(r.y).toFixed(1)}`
 
     return () => cancelAnimationFrame(id);
   }, []);
+
   useEffect(() => {
     const circle = circleRef.current;
     if (!circle) return;
@@ -207,6 +223,7 @@ YAW : ${THREE.MathUtils.radToDeg(r.y).toFixed(1)}`
       circle.emit('do-fade-in');
     }
   }, [isTransitioning]);
+
   useEffect(() => {
     if (hudRef.current && vrHudTexture) {
       const mesh = hudRef.current.getObject3D('mesh');
@@ -223,12 +240,11 @@ YAW : ${THREE.MathUtils.radToDeg(r.y).toFixed(1)}`
     return () => { el.removeEventListener('click', handleClick); el.removeEventListener('mousedown', handleClick); };
   }, [isVRMode, onVRTerminalClick]);
 
-
   return (
     <a-entity id="rig" position="0 0 0">
       <a-camera position="0 1.6 0"
         wasd-controls="enabled: false"
-        look-controls="pointerLockEnabled: false; touchEnabled: true"
+        look-controls="pointerLockEnabled: false; touchEnabled: false"
         free-move={`speed: 0.1; enabled: ${!isKeyboardOpen && !isWelcomeOpen}`}>
 
         <a-cursor raycaster="objects: .clickable; far: 100" color="#22d3ee"
@@ -257,7 +273,7 @@ YAW : ${THREE.MathUtils.radToDeg(r.y).toFixed(1)}`
             <a-plane ref={hudRef} width="2.2" height="1.1"
               material="shader: flat; transparent: true; side: double; alphaTest: 0.01"></a-plane>
           </a-entity>
-        )} 
+        )}
       </a-camera>
 
       <a-entity laser-controls="hand: left" raycaster="objects: .clickable; far: 20"

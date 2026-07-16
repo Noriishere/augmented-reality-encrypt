@@ -15,6 +15,7 @@ import LandingPage from './components/LandingPage';
 import RakshaExpertCorridor from './rooms/RakshaExpert/Corridor';
 import EvaluationRoom from './rooms/EvaluationRoom';
 import { useRoomWelcomeVRTexture } from './components/UseRoomWelcomeVrTexture';
+import MobileTouchControls from './components/MobileTouchControls';
 
 function glitchStr(str, intensity = 0.15) {
   const chars = '!@#$%^&*01';
@@ -614,7 +615,12 @@ function App() {
           onStart={dismissWelcome}
         />
       )}
-
+      {!isVRMode && (
+        <MobileTouchControls
+          isVRMode={isVRMode}
+          disabled={showKeyboard || !!roomWelcome?.visible || isTransitioning}
+        />
+      )}
       <a-scene
         ref={sceneRef}
         embedded
