@@ -9,7 +9,7 @@ import RakshaBasicRoom2 from './rooms/RakshaBasic/Room2';
 import RakshaExpertRoom1 from './rooms/RakshaExpert/Room1';
 import RakshaBeginnerRoom from './rooms/RakshaBeginner/Room1';
 import LoadingScreen from './components/LoadingScreen';
-import RoomWelcomeHUD from './components/RoomWelcomeHUD';
+import RoomWelcomeHUD from './components/RoomWelcomeHud';
 import { resolveRoomIntro } from './components/RoomIntros';
 import LandingPage from './components/LandingPage';
 import RakshaExpertCorridor from './rooms/RakshaExpert/Corridor';
