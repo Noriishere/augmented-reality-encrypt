@@ -277,7 +277,7 @@ YAW : ${THREE.MathUtils.radToDeg(r.y).toFixed(1)}`
       </a-camera>
 
       <a-entity laser-controls="hand: left" raycaster="objects: .clickable; far: 20"
-        line="color: #22d3ee; opacity: 0.6"></a-entity>
+        line="color: #22d367; opacity: 0.6"></a-entity>
       <a-entity laser-controls="hand: right" raycaster="objects: .clickable; far: 20"
         line="color: #22d3ee; opacity: 0.6"></a-entity>
     </a-entity>
