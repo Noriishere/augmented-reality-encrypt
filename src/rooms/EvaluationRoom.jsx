@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import { getRoomEvaluation } from '../rooms/roomEvaluations';
 
-// roomKey WAJIB diisi dari pemanggil, contoh: 'basic-room1', 'basic-room2', 'expert-room1'
 export default function EvaluationRoom({ mistakes, onBackToLobby, roomKey }) {
     const isPerfect = mistakes === 0;
     const evalData = getRoomEvaluation(roomKey);
@@ -18,7 +17,6 @@ export default function EvaluationRoom({ mistakes, onBackToLobby, roomKey }) {
             }
         }
 
-        // Pastikan free-move mendeteksi dinding .solid yang baru saja di-mount
         const scene = document.querySelector('a-scene');
         if (scene) {
             scene.emit('refresh-solids');
@@ -31,7 +29,6 @@ export default function EvaluationRoom({ mistakes, onBackToLobby, roomKey }) {
 
     const accent = isPerfect ? "#10b981" : "#f59e0b";
 
-    // Bingkai TV reusable
     const TVFrame = ({ position, width, height, children }) => (
         <a-entity position={position}>
             <a-box position="0 0 -0.05" width={width + 0.2} height={height + 0.2} depth="0.08"
@@ -63,36 +60,30 @@ export default function EvaluationRoom({ mistakes, onBackToLobby, roomKey }) {
 
     return (
         <a-entity id="evaluation-room">
-            {/* ===== RUANGAN ===== */}
             <a-sky color="#020617"></a-sky>
             <a-light type="ambient" color="#1e293b" intensity="0.55"></a-light>
-            <a-light type="point" color={accent} intensity="0.9" position="0 3 -3"></a-light>
+            <a-light type="point" color={accent} intensity="0.9" position="0 3 -4"></a-light>
             <a-light type="point" color="#0ea5e9" intensity="0.35" position="0 2 2"></a-light>
 
-            {/* Lantai */}
             <a-plane position="0 0 0" rotation="-90 0 0" width="11" height="10"
                 material="color: #0b1220; roughness: 0.85; metalness: 0.15"></a-plane>
 
-            {/* Dinding belakang */}
-            <a-plane position="0 2.5 -4" width="11" height="5" className="solid"
+            <a-plane position="0 2.5 -5" width="11" height="5" className="solid"
                 material="color: #0f172a; roughness: 0.9"></a-plane>
 
-            {/* Dinding depan (baru) — menghadap ke dalam ruangan */}
-            <a-plane position="0 2.5 4" rotation="0 180 0" width="11" height="5" className="solid"
+            <a-plane position="0 2.5 5" rotation="0 180 0" width="11" height="5" className="solid"
                 material="color: #0f172a; roughness: 0.9"></a-plane>
 
-            {/* Dinding kiri & kanan */}
-            <a-plane position="-5.5 2.5 0" rotation="0 90 0" width="8" height="5" className="solid"
-                material="color: #0c1524; roughness: 0.9"></a-plane>
-            <a-plane position="5.5 2.5 0" rotation="0 -90 0" width="8" height="5" className="solid"
+            <a-plane position="-5.5 2.5 0" rotation="0 90 0" width="10" height="5" className="solid"
                 material="color: #0c1524; roughness: 0.9"></a-plane>
 
-            {/* Garis neon lantai-dinding */}
-            <a-box position="0 0.015 -4" width="11" height="0.03" depth="0.03"
+            <a-plane position="5.5 2.5 0" rotation="0 -90 0" width="10" height="5" className="solid"
+                material="color: #0c1524; roughness: 0.9"></a-plane>
+
+            <a-box position="0 0.015 -5" width="11" height="0.03" depth="0.03"
                 material={`color: ${accent}; emissive: ${accent}; emissiveIntensity: 1`}></a-box>
 
-            {/* ===== TV 1 (KIRI) — STATUS EVALUASI ===== */}
-            <TVFrame position="-2.6 2.4 -3.88" width={4.8} height={3.2}>
+            <TVFrame position="-2.6 2.4 -4.88" width={4.8} height={3.2}>
                 <a-text value="LOG SISTEM // LAPORAN EVALUASI" position="0 1.3 0.04" align="center"
                     color="#5a7a8a" scale="0.35 0.35 0.35" font="mozillavr"></a-text>
 
@@ -100,21 +91,20 @@ export default function EvaluationRoom({ mistakes, onBackToLobby, roomKey }) {
                     color={accent} scale="0.6 0.6 0.6" font="mozillavr"></a-text>
 
                 <a-text value={evalData.roomLabel} position="0 0.6 0.04" align="center"
-                    color="#94a3b8" scale="0.6 0.6 0.6" width="4.4" wrap-count="38" font="mozillavr"></a-text>
+                    color="#94a3b8" scale="0.3 0.3 0.3" width="4.4" wrap-count="38" font="mozillavr"></a-text>
 
                 <a-box position="0 0.3 0.03" width="4.2" height="0.012" depth="0.005"
                     material={`color: ${accent}; emissive: ${accent}; emissiveIntensity: 1`}></a-box>
 
                 <a-text value={isPerfect ? "STATUS: SEMPURNA" : `STATUS: SELESAI — ${mistakes} KESALAHAN`}
                     position="0 -0.1 0.04" align="center"
-                    color={accent} scale="0.6 0.6 0.6" font="mozillavr"></a-text>
+                    color={accent} scale="0.4 0.4 0.4" font="mozillavr"></a-text>
 
                 <a-text value={statusMessage} position="0 -0.7 0.04" align="center"
-                    color="#e2e8f0" scale="0.6 0.6 0.6" width="4.4" wrap-count="35" font="mozillavr"></a-text>
+                    color="#e2e8f0" scale="0.32 0.32 0.32" width="4.4" wrap-count="35" font="mozillavr"></a-text>
             </TVFrame>
 
-            {/* ===== TV 2 (KANAN) — APA YANG SUDAH KAMU PELAJARI ===== */}
-            <TVFrame position="2.6 2.4 -3.88" width={4.8} height={3.2}>
+            <TVFrame position="2.6 2.4 -4.88" width={4.8} height={3.2}>
                 <a-text value="[ APA YANG SUDAH KAMU PELAJARI ]" position="0 1.25 0.035" align="center"
                     color="#38bdf8" scale="0.70 0.70 0.70" font="mozillavr"></a-text>
 
@@ -126,26 +116,25 @@ export default function EvaluationRoom({ mistakes, onBackToLobby, roomKey }) {
 
                 {evalData.lessons.map((lesson, i) => (
                     <a-text key={i} value={`• ${lesson}`}
-                        position={`-2.1 ${0.1 - i * 0.45} 0.04`} 
+                        position={`-2.1 ${0.1 - i * 0.45} 0.04`}
                         align="left" color="#cbd5e1" scale="0.60 0.60 0.60"
                         width="4.4" wrap-count="45" font="mozillavr"></a-text>
                 ))}
             </TVFrame>
 
-            {/* ===== KONSOL (TENGAH) — TOMBOL KEMBALI KE LOBBY ===== */}
             <a-entity position="0 0 1.4">
                 <a-box position="0 0.5 0" width="1.4" height="1" depth="0.6"
-                    className="solid" color="#111827" material="roughness: 0.5; metalness: 0.4"></a-box>
+                    color="#111827" material="roughness: 0.5; metalness: 0.4"></a-box>
 
                 <a-box position="0 1.02 0" width="1.3" height="0.04" depth="0.5"
-                    className="solid" material={`color: ${accent}; emissive: ${accent}; emissiveIntensity: 0.8`}></a-box>
+                    material={`color: ${accent}; emissive: ${accent}; emissiveIntensity: 0.8`}></a-box>
 
                 <a-box position="0 0.75 0.31" width="1.1" height="0.35" depth="0.05"
-                    className="solid" color={isPerfect ? "#059669" : "#d97706"} className="clickable"
+                    color={isPerfect ? "#059669" : "#d97706"} className="clickable"
                     animation__hover="property: scale; to: 1.05 1.05 1.05; startEvents: mouseenter; dur: 200"
                     animation__leave="property: scale; to: 1 1 1; startEvents: mouseleave; dur: 200"
                     onClick={onBackToLobby}></a-box>
-                    
+
                 <a-text value="KEMBALI KE LOBBY" position="0 0.75 0.34" align="center"
                     color="#ffffff" scale="0.35 0.35 0.35" font="mozillavr"></a-text>
             </a-entity>
